@@ -1,0 +1,204 @@
+---
+category: 'note'
+cover: './top.jpg'
+title: 'Lamport Clocks'
+subtitle: 'Logical clocks for defining order in distributed systems'
+description: 'Logical clocks for defining order in distributed systems'
+date: '2020-12-11'
+tags: ['Distributed Systems']
+published: true
+state: draft
+updated: '2020-12-11'
+importance: low
+evergreen: 🌳
+series: 
+seriesurl: 
+review: continuous
+---
+
+Back in the late 1970's Leslie Lamport wrote a paper in which he introduced logical clocks. The paper had three main points: firstly, if a distributed system is built up of multiple independent servers, and some of the servers never interact with each other, then there is little theotical need for the non-interacting server clocks to be sychronised since any difference would never be observed. Secondly, in distributed systems, he showed that time is less important than agreement across components of the order of events in which things occur. And finally, he provided algorithms for partial causal ordering and an extension which provides total ordering.
+
+Lamport clocks are event counters that are incremented with every interaction. They are incremented and sent as a part of a message by a sending process and are in turn incremented by a receiving process before it sends it on to the business logic. The value produced by a Lamport clock is a Lamport timestamp.
+
+A Lamport clock offers us a single guarantee – if we have two timestamp values `a` and `b`, and when comparing them we see that `a < b`, then we can guarantee that the clock value of `a` was smaller than the clock value of `b`. When different processes have `a < b`, it means that they all agree that `a` happened before `b`.
+
+Adding a Lamport timestamp on the sending side can be done by:
+
+```java linenums="1" hl_lines="5"
+long time = 0;
+...
+void send(byte[] message)
+{
+    time = time + 1;
+    send(message, time);
+}
+```
+
+And on the receiving side it is:
+
+```java linenums="1"  hl_lines="5"
+long time = 0;
+...
+void receive(byte[] message, long timeStamp)
+{
+    time = max(timeStamp, time) + 1;
+    //do stuff with message and new time
+    process(message, time);
+}
+```
+
+Visually, the behavior of Lamport Clocks is as follows:
+
+<div align="center">
+<svg width="100%" height="auto" viewBox="0 0 917 594" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>lamport-clock</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="lamport-clock" transform="translate(-20.000000, -16.000000)">
+            <g transform="translate(28.000000, 16.000000)">
+                <rect id="Rectangle" stroke="#000000" stroke-width="2" fill="#DDEFFC" x="40" y="1" width="162" height="94" rx="4"></rect>
+                <text id="Process-A" font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="85.132" y="42">Process</tspan>
+                    <tspan x="114.448" y="67">A</tspan>
+                </text>
+                <rect id="Rectangle" stroke="#000000" stroke-width="2" fill="#DDEFFC" x="393" y="1" width="162" height="94" rx="4"></rect>
+                <text id="Process-B" font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="438.132" y="42">Process</tspan>
+                    <tspan x="467.49" y="67">B</tspan>
+                </text>
+                <line x1="474.5" y1="96.5" x2="474.5" y2="592.5" id="Line-5" stroke="#000000" stroke-width="2" stroke-linecap="square"></line>
+                <rect id="Rectangle" stroke="#000000" stroke-width="2" fill="#DDEFFC" x="746" y="1" width="162" height="94" rx="4"></rect>
+                <text id="Process-C" font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="791.132" y="42">Process</tspan>
+                    <tspan x="821.1725" y="67">C</tspan>
+                </text>
+                <line x1="827.5" y1="96.5" x2="827.5" y2="592.5" id="Line-5" stroke="#000000" stroke-width="2" stroke-linecap="square"></line>
+                <path d="" id="Path-3" stroke="#979797"></path>
+                <text id="Time" transform="translate(14.500000, 478.000000) rotate(-270.000000) translate(-14.500000, -478.000000) " font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="-8.5055" y="484.5">Time</tspan>
+                </text>
+                <path id="Line-5" d="M2,458.5 L2,567.5 L8,567.5 L1,581.5 L-6,567.5 L0,567.5 L0,458.5 L2,458.5 Z" fill="#000000" fill-rule="nonzero"></path>
+                <line x1="122.5" y1="96.5" x2="122.5" y2="592.5" id="Line-5" stroke="#000000" stroke-width="2" stroke-linecap="square"></line>
+                <rect id="Rectangle" stroke="#000000" stroke-width="2" fill="#FFFDE1" x="101" y="117" width="41" height="41"></rect>
+                <rect id="Rectangle" stroke="#000000" stroke-width="2" fill="#FFFDE1" x="454" y="324" width="41" height="41"></rect>
+                <text id="1" font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="116.41" y="144">1</tspan>
+                </text>
+                <rect id="Rectangle" stroke="#000000" stroke-width="2" fill="#FFFDE1" x="102" y="230" width="41" height="41"></rect>
+                <rect id="Rectangle" stroke="#000000" stroke-width="2" fill="#FFFDE1" x="101" y="546" width="41" height="41"></rect>
+                <rect id="Rectangle" stroke="#000000" stroke-width="2" fill="#FFFDE1" x="101" y="411" width="41" height="41"></rect>
+                <path id="Line-3" d="M142.867593,137.184732 L144.341431,137.463662 L435.601,192.586 L437.089229,184.725549 L453.991279,197.592977 L433.556107,203.39416 L435.044,195.533 L143.783569,140.411338 L142.309732,140.132407 L142.867593,137.184732 Z" fill="#000000" fill-rule="nonzero"></path>
+                <path id="Line-3" d="M143.327056,248.697102 L144.814977,248.887079 L785.339,330.669 L786.352166,322.733447 L803.995974,334.563326 L783.945786,341.580445 L784.958,333.645 L144.435023,251.862921 L142.947102,251.672944 L143.327056,248.697102 Z" fill="#000000" fill-rule="nonzero"></path>
+                <path id="Line-3" d="M805.811393,485.832593 L806.167407,488.811393 L804.678007,488.9894 L162.047,565.794 L162.996649,573.737449 L143.003533,566.559336 L160.741894,554.871711 L161.691,562.815 L804.321993,486.0106 L805.811393,485.832593 Z" fill="#000000" fill-rule="nonzero"></path>
+                <path id="Line-3" d="M495.488142,340.635558 L496.926292,341.06185 L786.188,426.803 L788.462667,419.134116 L803.979383,433.642097 L783.062969,437.350681 L785.336,429.68 L496.073708,343.93815 L494.635558,343.511858 L495.488142,340.635558 Z" fill="#000000" fill-rule="nonzero"></path>
+                <text id="Event-A" transform="translate(298.000000, 154.500000) rotate(11.000000) translate(-298.000000, -154.500000) " font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="262.6675" y="161">Event A</tspan>
+                </text>
+                <text id="Event-C" transform="translate(299.000000, 255.500000) rotate(7.000000) translate(-299.000000, -255.500000) " font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="264.392" y="262">Event C</tspan>
+                </text>
+                <text id="Event-B" transform="translate(567.000000, 347.500000) rotate(16.000000) translate(-567.000000, -347.500000) " font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="531.7095" y="354">Event B</tspan>
+                </text>
+                <text id="Event-E" transform="translate(334.373285, 528.428221) rotate(-7.000000) translate(-334.373285, -528.428221) " font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="299.723285" y="534.928221">Event E</tspan>
+                </text>
+                <path id="Line-3" d="M804.889834,382.89739 L805.10261,385.889834 L803.606388,385.996222 L161.059,431.683 L161.627201,439.663957 L142.001259,431.535463 L160.27962,420.711806 L160.847,428.691 L803.393612,383.003778 L804.889834,382.89739 Z" fill="#000000" fill-rule="nonzero"></path>
+                <text id="Event-D" transform="translate(313.500000, 403.500000) rotate(-4.000000) translate(-313.500000, -403.500000) " font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="277.842" y="410">Event D</tspan>
+                </text>
+                <text id="3" font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="468.41" y="351">3</tspan>
+                </text>
+                <rect id="Rectangle" stroke="#000000" stroke-width="2" fill="#FFFDE1" x="454" y="176" width="41" height="41"></rect>
+                <text id="2" font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="468.41" y="204">2</tspan>
+                </text>
+                <rect id="Rectangle" stroke="#000000" stroke-width="2" fill="#FFFDE1" x="804" y="313" width="41" height="41"></rect>
+                <rect id="Rectangle" stroke="#000000" stroke-width="2" fill="#FFFDE1" x="804" y="364" width="41" height="41"></rect>
+                <rect id="Rectangle" stroke="#000000" stroke-width="2" fill="#FFFDE1" x="804" y="413" width="41" height="41"></rect>
+                <text id="4" font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="819.41" y="391">4</tspan>
+                </text>
+                <rect id="Rectangle" stroke="#000000" stroke-width="2" fill="#FFFDE1" x="805" y="467" width="41" height="41"></rect>
+                <text id="3" font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="819.41" y="341">3</tspan>
+                </text>
+                <text id="5" font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="818.41" y="440">5</tspan>
+                </text>
+                <text id="6" font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="819.41" y="494">6</tspan>
+                </text>
+                <text id="5" font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="115.41" y="438">5</tspan>
+                </text>
+                <text id="7" font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="115.41" y="573">7</tspan>
+                </text>
+                <text id="2" font-family="w-sans" font-size="21" font-weight="normal" fill="#000000">
+                    <tspan x="116.41" y="257">2</tspan>
+                </text>
+            </g>
+        </g>
+    </g>
+</svg>
+</div>
+
+The above example illustrates how Lamport Clocks can give ordering to the causal event flows `Event C -> Event D` and `Event A -> Event B -> Event E` within the process space of Process A. Note that we cannot say anything about `Event A` causing `Event C`. It also shows how Lamport Clocks may result in duplicate clock values across processes, and how clock values cannot be taken to be reliable representative of the real-world *happend before*.
+
+Lamport Clocks can be extended to provide total ordering with multiple processes. In this case, you will need to introduce a tie breaker value such as a derived process identifier, and have each process hold two values - the Lamport timestamp value (timestamp) and process identifier (id). The process identifier could be constructed from a process specific value such as an IP address. If we consider two processes, `m` and `n`: `(m.Timestamp, m) < (n.Timestamp, n)` then we have total ordering _if and only if_ `m.Timestamp<n.Timestamp` or `(m.Timestamp=n.Timestamp and m<n)`. Note this does not necessarily relate to actual event ordering.
+
+Lamport clocks cannot tell us if a message was concurrent, and cannot be used to infer causality between events. Vector clocks are a more sophisticated variant which gives us more guarantees, including knowledge of concurrency & causal history.
+
+---
+
+## Backlinks
+
+<div class="flex flex-row p-2 rounded-md">
+    <div class="pr-2">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+</svg>
+    </div>
+    <div>
+         <a href="../../article/chain-replication-craq#hermes">Chain replication, CRAQ and Hermes</a>
+    </div>
+</div>
+
+---
+
+## References
+
+<div class="flex flex-row p-2 rounded-md">
+    <div class="pr-2">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+          <path fill="#EFF7FE" d="M12 14l9-5-9-5-9 5 9 5z" />
+          <path fill="#EFF7FE" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+        </svg>
+    </div>
+    <div>
+        L. Lamport, “Time, clocks, and the ordering of events in a distributed system,” Commun. ACM, vol. 21, no. 7, pp. 558–565, Jul. 1978, doi: <a href="https://doi.org/10.1145/359545.359563" target="_blank">10.1145/359545.359563</a>
+    </div>
+</div>
+
+<div class="flex flex-row p-2 rounded-md">
+    <div class="pr-2">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+          <path fill="#EFF7FE" d="M12 14l9-5-9-5-9 5 9 5z" />
+          <path fill="#EFF7FE" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+        </svg>
+    </div>
+    <div>
+        M. Raynal and M. Singhal, “Logical time: capturing causality in distributed systems,” Computer, vol. 29, no. 2, pp. 49–56, Feb. 1996, doi: <a href="https://doi.org/10.1109/2.485846" target="_blank">10.1109/2.485846</a>.
+        Ulrich Drepper, RedHat: What every developer should know about memory
+    </div>
+</div>
+
+ 
+---
+
+## Change log
+
+- Added 11 December 2020 

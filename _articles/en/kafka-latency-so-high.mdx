@@ -1,0 +1,102 @@
+---
+category: 'article'
+cover: './cover.jpg'
+title: 'Why Kafka''s latency is so high'
+subtitle: 'A look at the tradeoffs made in Kafka to gain throughput at the cost of latency'
+description: 'And how Aeron avoids this'
+date: '2021-03-21'
+tags: ['Distributed Systems', 'Aeron', 'Kafka']
+published: true 
+state: draft
+updated: '2021-03-21'
+importance: medium
+series:
+seriesurl:
+review: continuous
+---
+
+## Overview 
+
+Kafka is said to be throughput oriented - it is built to maximize messaging throughput. 
+Kafka achieves this high throughput with unpredictable and at times high latency - which can reach hundreds of milliseconds when looking at 99th and higher percentiles - and thus isn't a good fit for latency sensitive environments.
+
+Aeron is both latency and throughput oriented - it aims to offer the highest throughput at the lowest and most predictable latency.
+
+This article takes a look at the Kafka and Aeron implementations of send and receive paths to illustrate why Kafka's latency is so high when compared to Aeron.
+
+Commits reviewed (both latest on the trunk/master branch at time of writing):
+
+- Kafka: `a290c8e1df371a5605d1eb2ed527f6021f2766b6`, dated 20 March 2021
+- Aeron: `1f60e0ff3e4e2df8149efcdd61d71859e2b981e3`, dated 20 March 2021
+
+## Summary of key differences 
+
+The differences are tagged with one or more items:
+
+- *[GC]* - a code decision that impacts the garbage collector. As the garbage collector runs, so the latency will start increasing and being less predictable.
+- *[OS]* - a decision wherein the Linux Kernel gets involved with sending or receiving data. Crossing the application/kernel barrier adds latency, as does Kernel interference in thread scheduling.
+- *[BL]* - a decision wherein the code will explicitly block (typically for a maximum amount of time) if specific conditions are met (for example, out of memory or concurrent thread access). Blocking code adds latency.  
+
+| Item | Kafka | Aeron |
+| :--- | :--- | :--- |
+| *[GC]* Object Allocation on the Send path | Frequent allocation of new items.  | Allocation free in Aeron |
+| *[GC]* Buffer Allocation on the Send path | Buffers can be allocated with the compression, serialization and accumulator | Buffers allocated on start and never resized. Application can run allocation free for sending if needed. |
+| *[BL]* Multi-threaded send blocks | ReentrantLock in the BufferPool can lead to blocking, as can awaiting sufficient memory in BufferPool | Aeron uses thread safe, non blocking algorithms. Aeron does not have to await memory since it's all pre-allocated. |
+| *[OS]* Linux Kernel networking | Required | Optional. Can also use Kernel bypass with Solarflare cards to keep buffer movement between Aeron and the network adapter in the application space |
+| *[OS]* Precision thread control | Not possible | Aeron exposes the settings required for the application developer to have direct control over the threading in Aeron. This enables very tight control of CPU allocation at the OS level, reducing latency jitter |
+| Batching | Possible, but time oriented. | [Natural (aka Smart) Batching](../../note/natural-batching). This keeps throughput high while keeping latency low. |
+| *[GC]* Compression | Compression is optional. Batches are optionally compressed to reduce network transfers and Kafka Broker file I/O | Compression can be added at the application layer if needed. Only Aeron and Aeron Cluster would have file I/O implications. |
+| *[GC]* Java Encryption | Kafka makes use of Java's SSL library for connection encryption | Aeron only supports UDP, so SSL doesn't apply. It does however support encryption via OpenSSL on the C media driver (for users with a support contract). Restricting encryption to the C media driver ensures zero garbage collector overhead. |
+
+
+## Differences
+
+### Object Allocation on Send path
+
+Kafka's `KafkaProducer` object allocates multiple objects internally on the send path - for example, it will allocate `TopicPartion` and `InterceptorCallback` objects. This allocation creates work for the JVM Garbage Collector.
+
+Aeron has no allocation on the send path. With no allocation, there is nothing for the JVM Garbage Collector to do.
+
+### Buffer Allocation on the Send path
+
+Kafka's `BufferPool`, serializers (e.g. `IntegerSerializer`), and compression (e.g. `SnappyOutputStream`) will all perform some allocation during sending. Buffers do get cached and reused where possible in the `BufferPool` and compression objects. Again, this allocation results in more work for the JVM Garbage Collector.
+
+Aeron makes use of pre-allocated `LogBuffer`s. When a `Publication` is created, so is an underlying `LogBuffer`. These are memory mapped files typically held within a memory resident file system such as `\dev\shm`.
+Each `LogBuffer` is divided into three terms, one of which is `active` at any time. As the `active` term is used by send operations, the memory available for use within that `LogBuffer` `term` is consumed. 
+Once the `active` term is full, Aeron performs a `LogBuffer` rotation, which switches a `clean` LogBuffer to the `active` state, and marking the previously `active` one as `dirty`. The `dirty` `term` is then cleaned, becoming ready for use on the next rotation. This single allocation and reuse means no buffer allocations are done during sending, and additionally, there is no work for the JVM Garbage Collector.  
+
+An additional capability that Aeron offers - via `Publication.tryClaim` - is to allow your application code to write directly into the `active` `LogBuffer`. This enables zero copy sending. Combining this with the use of [flyweights](../../note/flyweights) can enable zero allocation on the sending path at both Aeron and application layers. Note that to use this, your message size must be smaller than the MTU.
+
+### Multi-threaded send blocks
+
+If Kafka needs to allocate memory within the `BufferPool` when accumulating data for sending, it makes use of a `RenentrantLock` to block concurrent threads from allocating data at the same time.
+Also in `BufferPool`, Kafka will block until there is sufficient memory space accumulated to construct the send buffer. If the blocking time is exceeded without sufficient memory being accumulated - which can happen if the Kafka Broker is too slow - a `BufferExhaustedException` is thrown and the application code must handle this. 
+Additionally, within the `RecordAccumulator`, Kafka holds a lock to ensure that there is no concurrent access to Deque&lt;ProducerBatch&gt; variables in multiple parts of the code.
+All of this locking on the send path results in higher latency.
+
+Aeron makes use of atomic buffer operations (e.g. compare-and-swap, volatiles) to safely allow concurrent threads to send on the same `ConcurrentPublication` while sharing the same `LogBuffer`.
+If you don't need multiple threads, you can make use of the `ExclusivePublication`, which removes these atomic buffer operations.
+If Aeron is unable to accept more data because the `active` `LogBuffer` is unable to accept more data - which could happen if the consumer was too slow - then Aeron returns immediately with a [back pressure](../../note/backpressure) indicator. As with Kafka, it is then up to the application code to handle this.
+
+### Linux Kernel Networking
+
+Kafka makes use of standard Java networking, which means that when it must send the accumulated (batched), compressed, data, it must move it to the kernel space before being copied to the network adapter buffer. Kafka makes use of `FileChannel.transferTo`, which is especially helpful on the Broker as it allows direct transfer from the disk read buffer to the network send buffer. 
+For send operations, the buffer must transfer from the application, and then to the kernel and finally onto the network adapter for sending. This bouncing between application and kernel code introduces a small amount of latency.
+
+Within send operations, Aeron can either make use of kernel networking - much like Kafka, or use kernel bypass networking. In this mode - which requires specific hardware - the Aeron send buffer is transferred directly into the network adapter's send buffer without going via the Linux Kernel. This capability reduces latency by a large percentage, and requires a Real-Logic support contract.  
+
+For Kafka broker like operations in Aeron Archive - in which a publisher application needs to replay from a file because the consumer joined late or has requested a replay, `FileChannel` is also used, however, it is not all kept within the Linux Kernel like it is in Kafka. Aeron Archive offers the capability to merge to a live stream, which allows fast consumers to use the disk replay only until they have caught up, and then automatically switch to the live stream (which sidesteps the disk I/O). This reduces the increased latency to disk bound replay operations.
+
+### Precision thread control
+
+Kafka is built with an event loop style, but does not allow precision thread control.
+
+Aeron is also built with an event loop style, but allows very specific thread control - both in terms of the usage of threads for core components (e.g. you can run the Aeron `send` and `receive` threads on shared or dedicated threads, depending on configuration), and in terms of the event loop resource utilization. By taking control of the event loop idle strategies, the application developer is in total control of Aeron resource usage. In very high performance environments you can isolate the Aeron threads, pin them to dedicated CPU cores (which the administrator has balanced correctly given the NUMA hardware), and run the threads in a busy spin loop. This reduces jitter and keeps latency highly predictable. 
+
+
+---
+
+## Change log
+
+- First draft 21 March 2021
+   

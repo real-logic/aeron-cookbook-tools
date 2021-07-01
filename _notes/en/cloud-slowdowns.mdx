@@ -1,0 +1,41 @@
+---
+category: 'note'
+cover: './top.jpg'
+title: 'Unexpected slowdowns in the cloud'
+subtitle: 'The silent killer.'
+description: 'Techniques to achieve fail fast with slowdowns'
+date: '2021-03-27'
+tags: ['Distributed Systems']
+published: false
+state: draft
+updated: '2021-03-27'
+importance: low
+evergreen: 🌱
+series: 
+seriesurl: 
+review: continuous
+---
+
+When building distributed systems, it is typically a key design goal for the system to fail fast when there is a fault detected or SLO breach.
+Sometimes the system will fail fast automatically, such as when there is a kernel panic, or a JVM core dump. 
+Sometimes though, we face issues that we ideally want to result in a fail fast, but which we have to explicitly detect. 
+One example of this is when we face an error in the logic within a clustered process (e.g. Aeron Cluster or similar) resulting in the internal state of one or more nodes diverging.
+Solving diverged cluster nodes can be a complex, but this can pale in complexity to dealing with distributed system faults due to some kind of slow down. This is especially common in public and private cloud environments.
+The causes of something 'running slow' vary widely - for example, a disk hardware issue that results in slow file system I/O, a faulty DIMM that results slow memory access, a faulty network cable that results in poor network performance, or a network that is running slow due to over saturation by other processes.
+
+In the best scenario the issue can be detected by the process itself, and it can raise errors and fail. In the worst case, the process can appear to be running perfectly fine, exhibit no errors or internal SLO breaches, and yet clients of the service are facing severe issues.
+
+Techniques to detect slow downs
+
+- In event loop based server processes, we can detect a lack of CPU resources by monitoring the time within reasonably tight yet highly predictable loops. Take the time upon entering a loop, and compare it to the last time the loop was entered into. If it exceeds some defined limit, the process is not getting sufficient CPU resources and can begin the process of halting.
+- When dealing with external network resources, use timers to detect timeouts. Once a reply to a request comes in, cancel the timer. If it does not come back within the requested time, retry, or if critical to operation, the service can begin the process of halting. If you require thousands (or more) concurrent requests, consider using efficient timer structures such as Timer Wheels. 
+
+Sometimes, we cannot safely make automatic decisions, and have to use signals from external sources.
+
+
+
+---
+
+## Change log
+
+- Added 27 March 2021 

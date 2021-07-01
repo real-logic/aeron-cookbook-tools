@@ -1,0 +1,120 @@
+---
+category: 'note'
+cover: './top.jpg'
+title: 'Distributed system faults'
+subtitle: 'The core types of faults encountered with distributed systems'
+description: 'The core types of faults encountered with distributed systems'
+date: '2020-12-13'
+tags: ['Distributed Systems']
+published: true
+state: draft
+updated: '2021-04-03'
+importance: low
+evergreen: 🌱
+series: 
+seriesurl: 
+review: continuous
+---
+
+Traditionally, two general classes of faults are considered in distributed systems: Benign faults and Byzantine faults. On the cloud we also tend to observe another class of fault: gray failures or slow down faults.
+
+### Benign faults
+
+Benign faults are those which have clear, detectable outcomes.
+Often it can be best for the distributed system as a whole if these kinds of faults are converted into fail-stop faults. 
+For example, if a producer component of the system is sending key messages to a consuming system faster than that consuming system can consume, and the buffers are full - it can be a better outcome if that process fails rather than silently dropping messages.
+Another example is memory limits on a Docker container to allow only so much memory usage by a given container - if we have a process that leaks memory, it is often better for that process to be killed rather than having the entire host have issues due to out of memory errors (or worse, having the Linux OOM Killer select the wrong process to kill). 
+
+### Byzantine faults
+
+These faults cover a wide array of erroneous behavior, and can be very challenging to deal with. 
+The problem is often made worse since most consensus algorithms do not properly handle these faults - notably Raft, which is gaining popularity in cloud services (Consol, Kafka, Aeron Cluster for example). 
+The application developer is left to solve these kinds of problems.
+
+Much like with benign faults, it is often preferable for a distributed system to do what it can to convert a Byzantine fault into a fail-stop fault. 
+For example, if you have a Raft cluster that has nodes that have diverged in their internal state due to an application defect, you would want to have the Raft cluster fail the moment the current leader has changed, rather than having a new leader take over with an unknown state, producing an invalid or corrupted raft log.  
+
+### Gray failures or Slow down faults
+
+There are a wide array of causes of these faults - the common theme being that an external (to your application) resource, such as a CPU or network, is operating slower than expected and without raising errors. 
+
+- a disk or storage array hardware issue that results in slow file system I/O 
+- a faulty DIMM that results in slow memory access
+- a faulty network cable that results in poor network performance
+- a network that is running slow due to over saturation by other processes.
+
+These are especially common on the cloud or in an environment with hundreds (or more) of servers deployed. 
+As distributed systems involve more and more processes and servers, we are more likely to be subjected to faults that are caused by something slowing down. 
+These can be very complex to deal with, and can lead to impacts or outages in system components not being subjected to the slow down - so tracking them down can take time.
+
+---
+
+## Backlinks
+
+<div class="flex flex-row p-2 rounded-md">
+    <div class="pr-2">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+</svg>
+    </div>
+    <div>
+         <a href="../../article/primary-backup/">Primary-backup replication</a>
+    </div>
+</div>
+
+---
+
+## References
+
+<div class="flex flex-row p-2 rounded-md">
+<div class="pr-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+  <path fill="#EFF7FE" d="M12 14l9-5-9-5-9 5 9 5z" />
+  <path fill="#EFF7FE" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+</svg>
+</div>
+<div>G. Goos et al., “Lecture Notes in Computer Science,” vol 5959, <a href="https://doi.org/10.1007/978-3-642-11294-2">doi: 10.1007/978-3-642-11294-2</a>.
+</div>
+</div> 
+
+<div class="flex flex-row p-2 rounded-md">
+<div class="pr-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+  <path fill="#EFF7FE" d="M12 14l9-5-9-5-9 5 9 5z" />
+  <path fill="#EFF7FE" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+</svg>
+</div>
+<div>Miguel Castro and Barbara Liskov. 1999. Practical Byzantine fault tolerance. In <i>Proceedings of the third symposium on Operating systems design and implementation</i> (<i>OSDI '99</i>). USENIX Association, USA, 173–186. <a href="https://dl.acm.org/doi/10.5555/296806.296824">doi: 10.5555/296806.296824</a>.
+</div>
+</div> 
+
+<div class="flex flex-row p-2 rounded-md">
+<div class="pr-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+  <path fill="#EFF7FE" d="M12 14l9-5-9-5-9 5 9 5z" />
+  <path fill="#EFF7FE" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+</svg>
+</div>
+<div>Pat Helland. 2021. Fail-fast Is Failing... Fast! Changes in compute environments are placing pressure on tried-and-true distributed-systems solutions. <i>Queue</i> 19, 1, Pages 60 (January-February 2021), 11 pages. <a href="https://doi.org/10.1145/3454122.3458812">doi: 10.1145/3454122.3458812</a>.
+</div>
+</div> 
+
+<div class="flex flex-row p-2 rounded-md">
+<div class="pr-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+  <path fill="#EFF7FE" d="M12 14l9-5-9-5-9 5 9 5z" />
+  <path fill="#EFF7FE" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+</svg>
+</div>
+<div>Peng Huang, Chuanxiong Guo, Lidong Zhou, Jacob R. Lorch, Yingnong Dang, Murali Chintalapati, and Randolph Yao. 2017. Gray Failure: The Achilles' Heel of Cloud-Scale Systems. In <i>Proceedings of the 16th Workshop on Hot Topics in Operating Systems</i> (<i>HotOS '17</i>). Association for Computing Machinery, New York, NY, USA, 150–155. <a href="https://doi.org/10.1145/3102980.3103005">doi: 10.1145/3102980.3103005</a>.
+</div>
+</div> 
+
+
+
+---
+
+## Change log
+
+- Added 13 December 2020 
+- Updated with slow down faults, 3 April 2021 

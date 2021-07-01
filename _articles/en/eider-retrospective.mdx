@@ -1,0 +1,191 @@
+---
+category: 'article'
+cover: './top.jpg'
+title: 'Eider Retrospective'
+description: 'Lessons learnt building Eider, and some considerations for a version 2'
+subtitle: 'A look back at the lessons learnt building Eider, and what I would do differently next time'
+date: '2020-11-29'
+tags: ['Distributed Systems']
+published: true
+state: final
+updated: '2020-11-29'
+importance: low
+series:
+seriesurl:
+review: one off
+---
+
+As a part of building the samples from Aeron Cookbook, I needed to demonstrate the approach of using off heap data structures within an Aeron Cluster. There is no open source solution that I'm aware of that I could use, so out of necessity I built Eider.
+
+## What is Eider, and what problems does it solve?
+
+When building systems for Aeron Cluster with strict performance requirements, you are going to find yourself in a battle against Little's Law [^1]. 
+Little's Law gives us an upper bound on the performance of Aeron Cluster - because Replicated State Machines are single threaded, the throughput of an Aeron Cluster is predominantly determined by how fast the logic is within the clustered service.
+One approach to reduce the processing time down as far as possible is to switch to off heap data structures, and to make use of cluster codecs which do not require serialization or deserialization.
+
+There are four areas in which using efficient codecs and off heap data structures can help increase throughput:
+
+- cluster codecs for inbound commands and outbound events,
+- the domain model holding state within the cluster,
+- the snapshot model, which holds the snapshot format and is used to store snapshots of the cluster state,
+- the replication model, which allows parts of the cluster state to be replicated to cluster clients. Not all scenarios require replication, so this is optional.
+
+<div align="center">
+<svg width="75%" height="auto" viewBox="0 0 818 539" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="77" height="459" rx="6" fill="#188FF4"/>
+<rect x="741" width="77" height="459" rx="6" fill="#188FF4"/>
+<rect x="61" width="692" height="459" fill="#5AC8FA"/>
+<text transform="translate(20 330) rotate(-90)" fill="white" xml:space="preserve" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif" font-size="24" letter-spacing="0em"><tspan x="0.472656" y="23.14">Inbound Commands</tspan></text>
+<text transform="translate(765 348) rotate(-90)" fill="white" xml:space="preserve" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif" font-size="24" letter-spacing="0em"><tspan x="32.7266" y="23.14">Outbound Events</tspan></text>
+<rect x="457" y="479" width="361" height="60" rx="6" fill="#2ACC41"/>
+<text transform="translate(536 491)" fill="black" xml:space="preserve" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif" font-size="24" letter-spacing="0em"><tspan x="1.43359" y="23.14">Replication Medium</tspan></text>
+<rect y="479" width="361" height="60" rx="6" fill="#FFCC02"/>
+<rect x="178" y="294" width="183" height="60" rx="6" fill="#FFCC02"/>
+<text transform="translate(79 491)" fill="black" xml:space="preserve" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif" font-size="24" letter-spacing="0em"><tspan x="10.2578" y="23.14">Snapshot Medium</tspan></text>
+<rect x="93" y="212" width="195" height="33" rx="5" fill="#007AFF"/>
+<text fill="white" xml:space="preserve" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif" font-size="24" letter-spacing="0em"><tspan x="142.758" y="235.14">Flyweight</tspan></text>
+<rect x="527" y="212" width="195" height="33" rx="5" fill="#007AFF"/>
+<text fill="white" xml:space="preserve" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif" font-size="24" letter-spacing="0em"><tspan x="576.758" y="235.14">Flyweight</tspan></text>
+<rect x="172" y="31" width="481" height="133" rx="6" fill="#FC826F"/>
+<text fill="black" xml:space="preserve" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif" font-size="24" letter-spacing="0em"><tspan x="312.902" y="91.14">Domain Model atop&#10;</tspan><tspan x="275.906" y="120.14">DirectBuffers or plain POJO</tspan></text>
+<path d="M220.445 163.599C220.224 162.8 219.397 162.333 218.599 162.555L205.591 166.168C204.793 166.39 204.326 167.216 204.547 168.015C204.769 168.813 205.596 169.28 206.394 169.058L217.956 165.847L221.168 177.409C221.39 178.207 222.216 178.674 223.015 178.453C223.813 178.231 224.28 177.404 224.058 176.606L220.445 163.599ZM194.306 210.738L220.306 164.738L217.694 163.262L191.694 209.262L194.306 210.738Z" fill="black"/>
+<path d="M637.858 211.493C638.682 211.572 639.415 210.967 639.493 210.142L640.773 196.703C640.852 195.878 640.247 195.146 639.422 195.068C638.597 194.989 637.865 195.594 637.787 196.419L636.649 208.365L624.703 207.227C623.878 207.148 623.146 207.753 623.068 208.578C622.989 209.403 623.594 210.135 624.419 210.213L637.858 211.493ZM598.844 164.955L636.844 210.955L639.156 209.045L601.156 163.045L598.844 164.955Z" fill="black"/>
+<path d="M754.061 230.061C754.646 229.475 754.646 228.525 754.061 227.939L744.515 218.393C743.929 217.808 742.979 217.808 742.393 218.393C741.808 218.979 741.808 219.929 742.393 220.515L750.879 229L742.393 237.485C741.808 238.071 741.808 239.021 742.393 239.607C742.979 240.192 743.929 240.192 744.515 239.607L754.061 230.061ZM722 230.5H753V227.5H722V230.5Z" fill="black"/>
+<path d="M93.0607 230.061C93.6464 229.475 93.6464 228.525 93.0607 227.939L83.5147 218.393C82.9289 217.808 81.9792 217.808 81.3934 218.393C80.8076 218.979 80.8076 219.929 81.3934 220.515L89.8787 229L81.3934 237.485C80.8076 238.071 80.8076 239.021 81.3934 239.607C81.9792 240.192 82.9289 240.192 83.5147 239.607L93.0607 230.061ZM61 230.5H92V227.5H61V230.5Z" fill="black"/>
+<path d="M312.67 292.693C313.052 293.428 313.958 293.713 314.693 293.33L326.666 287.093C327.4 286.71 327.686 285.804 327.303 285.07C326.92 284.335 326.014 284.05 325.28 284.432L314.637 289.977L309.093 279.334C308.71 278.6 307.804 278.314 307.07 278.697C306.335 279.08 306.05 279.986 306.432 280.72L312.67 292.693ZM352.569 164.549L312.569 291.549L315.431 292.451L355.431 165.451L352.569 164.549Z" fill="black"/>
+<path d="M526.521 293.422C527.306 293.686 528.157 293.264 528.422 292.479L532.731 279.685C532.995 278.9 532.573 278.049 531.788 277.785C531.003 277.52 530.152 277.942 529.888 278.727L526.057 290.1L514.685 286.269C513.9 286.005 513.049 286.427 512.785 287.212C512.52 287.997 512.942 288.848 513.727 289.112L526.521 293.422ZM462.656 165.667L525.656 292.667L528.344 291.333L465.344 164.333L462.656 165.667Z" fill="black"/>
+<path d="M191.539 481.34C191.727 482.147 192.534 482.649 193.34 482.461L206.488 479.397C207.295 479.209 207.797 478.403 207.609 477.596C207.421 476.789 206.614 476.288 205.807 476.476L194.12 479.199L191.397 467.512C191.209 466.705 190.403 466.203 189.596 466.391C188.789 466.579 188.288 467.386 188.476 468.193L191.539 481.34ZM270.726 353.208L191.726 480.208L194.274 481.792L273.274 354.792L270.726 353.208Z" fill="black"/>
+<path d="M639.767 480.482C640.585 480.611 641.353 480.052 641.482 479.233L643.581 465.897C643.71 465.079 643.151 464.311 642.332 464.182C641.514 464.054 640.746 464.613 640.617 465.431L638.751 477.285L626.897 475.419C626.079 475.29 625.311 475.849 625.182 476.668C625.054 477.486 625.613 478.254 626.431 478.383L639.767 480.482ZM547.787 354.883L638.787 479.883L641.213 478.117L550.213 353.117L547.787 354.883Z" fill="black"/>
+<text fill="black" xml:space="preserve" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif" font-size="24" letter-spacing="0em"><tspan x="213.09" y="332.14">Snapshot</tspan></text>
+<rect x="457" y="294" width="183" height="60" rx="6" fill="#2ACC41"/>
+<text fill="black" xml:space="preserve" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif" font-size="24" letter-spacing="0em"><tspan x="488.266" y="332.14">Replication</tspan></text>
+</svg>
+</div>
+
+With the first version of Eider, the following features were supported:
+- support for cluster codecs for messaging, off heap domain model repositories and an efficient snapshot model
+- Eider operates as an annotation processor, working off annotated plain old Java objects
+- easy integration with Aeron (demuxers to guide the inbound messages through switch statements to code processing the messages) and Aeron Cluster (snapshot/load from image)
+
+Within the domain model, the off heap repositories support:
+- limited allocation - limited to the indexes, which is in turn driven by the data
+- allows indexes on any number of field
+- sequences, using Atomic getAndAdd operations
+- transactions, with support for dirty reads and rollback
+- fixed size buffer and records
+
+Types are limited to those useful within a high performance financial system:
+- boolean
+- short
+- int
+- long
+- fixed length ASCII strings.
+
+A sample object for delivering both a message, and a repository is:
+
+```java
+@EiderRepository(name = "RfqsRepository")
+@EiderSpec(name = "RfqFlyweight")
+public class Rfq
+{
+    @EiderAttribute(key = true)
+    private int id;
+    private short state;
+    private long creationTime;
+    private long expiryTime;
+    private long lastUpdate;
+    private int lastUpdateUser;
+    @EiderAttribute(indexed = true)
+    private int requester;
+    @EiderAttribute(indexed = true)
+    private int responder;
+    private int securityId;
+    private int requesterCorrelationId;
+    private short side;
+    private long quantity;
+    private long lastPrice;
+    @EiderAttribute(indexed = true)
+    private long clusterSession;
+}
+```
+
+From this input object, Eider's annotation processor generated [message codecs](https://github.com/eleventy7/aeron-cookbook-code/blob/main/cluster-core/src/main/generated/com/aeroncookbook/cluster/rfq/domain/gen/RfqFlyweight.java) and [repositories](https://github.com/eleventy7/aeron-cookbook-code/blob/main/cluster-core/src/main/generated/com/aeroncookbook/cluster/rfq/domain/gen/RfqsRepository.java) with decent performance characteristics. For the message codecs, round trip time (which is encoding to buffer, and reading from a buffer) is 162 nanoseconds per operation at 99.9th percentile. During the tests, the memory allocations averaged 26kb a second, which is minimal given the 3.16 million executions of the benchmark.
+
+```bash 
+Benchmark                           Mode      Cnt       Score    Error    Units
+                                  sample  3163310      55.119 ±  0.820    ns/op
+roundtrip·p0.00                   sample                1.000             ns/op
+roundtrip·p0.50                   sample               47.000             ns/op
+roundtrip·p0.90                   sample               52.000             ns/op
+roundtrip·p0.95                   sample               54.000             ns/op
+roundtrip·p0.99                   sample               56.000             ns/op
+roundtrip·p0.999                  sample              161.689             ns/op
+roundtrip·p0.9999                 sample            19562.810             ns/op
+roundtrip·p1.00                   sample           280064.000             ns/op
+·gc.alloc.rate                    sample       15       0.025 ±  0.001    MB/sec
+·gc.alloc.rate.norm               sample       15       0.001 ±  0.001    B/op
+·gc.count                         sample       15         ≈ 0             counts
+```
+   
+Within the repository, performance remains similar with the creation of a new item in the repository taking around 2.9 microseconds at the 99.9th percentile. Allocation rates were a bit higher, at 16MB/sec. This higher allocation is largely driven by the indexing functionality as the repository is indexed on 3 fields.
+
+```bash
+Benchmark                           Mode      Cnt       Score    Error   Units
+                                  sample  1323481       0.441 ±  0.295   us/op
+createRfq·p0.00                   sample                0.025            us/op
+createRfq·p0.50                   sample                0.059            us/op
+createRfq·p0.90                   sample                0.071            us/op
+createRfq·p0.95                   sample                0.075            us/op
+createRfq·p0.99                   sample                0.085            us/op
+createRfq·p0.999                  sample                2.936            us/op
+createRfq·p0.9999                 sample               26.890            us/op
+createRfq·p1.00                   sample            72744.960            us/op
+·gc.alloc.rate                    sample        5      16.466 ±  0.191   MB/sec
+·gc.alloc.rate.norm               sample        5       0.562 ±  0.022   B/op
+·gc.churn.G1_Eden_Space           sample        5       0.228 ±  0.003   MB/sec
+·gc.churn.G1_Eden_Space.norm      sample        5       0.008 ±  0.001   B/op
+·gc.churn.G1_Old_Gen              sample        5       6.831 ±  0.083   MB/sec
+·gc.churn.G1_Old_Gen.norm         sample        5       0.233 ±  0.009   B/op
+·gc.churn.G1_Survivor_Space       sample        5       0.135 ±  0.003   MB/sec
+·gc.churn.G1_Survivor_Space.norm  sample        5       0.005 ±  0.001   B/op
+·gc.count                         sample        5      35.000            counts
+·gc.time                          sample        5      95.000            ms
+```
+
+### Downsides of the Eider approach:
+
+- using an annotation processor can be painful with both Gradle and Maven. External tools, like the `sbe-tool`, are simpler to use 
+- if you want to make use of both SBE and Eider - for example, by mixing SBE for messaging and snapshotting, but keeping Eider for the repository, then the integration between the two is very poor. For example, there is no mechanism to share enums.
+- there is no easy way to replicate changes to cluster clients that is built into Eider. You could of course just submit the updates to the repository in realtime to the any clients, but this can be suboptimal in some cases (for example with late joining clients - where does the initial state come from? This could be via an Aeron Archive, but this then requires a full replay of all changes to the repository).
+- transactional support requires copying the entire buffer - this can be expensive with large underlying buffers
+- Eider has no versioning support, which isn't ideal as it isn't always possible or desirable to deploy components in one go 
+- indexes require allocations as new data elements are indexed
+- Strings are used directly, resulting in a large amount of allocations when Eider is working with a fixed length ASCII field. 
+
+### Eider 2.0 improvements
+
+**If** I were to do build an Eider 2.0, I'd prioritize the following changes:
+
+- Remove the annotation processor, and switch to an XML based configuration and command line tool for codec and repository generation. This would function in a similar mechanism to `sbe-tool`. I've taken a look at a number of other approaches (including JSON, HOCON, YAML, TOML, Hashicorp HCL and a custom DSL) for describing repositories and codecs, and none are as efficient or as clear as XML. 
+- I'd switch the focus of Eider onto Repositories plus a library to efficiently replicate them. Messaging and Snapshot codecs would still be supported, but the focus would be on Repositories
+- I'd move to a more efficient approach for indexing which would remove any need for runtime allocation, but still support dynamic data. This would - like the repositories themselves - need to be presized upon creation
+- Strings would be rendered on demand only, with a CharSet of similar interal representation. This would reduce allocation, although it would be unavoidable once rendered to a String object
+- Add support for deleting items in the repository. This could be either with soft deletes + on demand vacuum or immediate deletes
+- Improve indexes, allowing for both ordered and unordered indexes along with the necessary allocation free iterators.  
+- Ability to register for callbacks that provide allocation percentage warnings, for example, a callback informing the code that the repository has reached 95% of available capacity
+- Efficient transactions. I still believe dirty reads are the most appropriate mechanism, however, only modified items should be copied to the rollback log. This would significantly reduce the cost of running transactional repositories.
+- Optional debug instrumentation to simplify solving some problems developers face with flyweight driven repositories. A typical example of this is accidental flyweight reuse.
+- Optional use of Unsafe. This would allow for both on heap and off heap data structures. Some code (for example sequences) would need buffer implementation specific logic, but that's easy to do.
+- Introduce enums, similar to Simple Binary Encoding. They would still be based off of a char/short/int/long, but would present the developer with a friendlier interface.  
+- Introduce versioning for codecs, with specific rules around forwards and backwards compatibility
+- Within Snapshots, introduce application provided metadata, plus hooks to read it before applying the snapshot. This is useful for things such as ensuring that the exact same code (as measured with a Git SHA-1) is reading as wrote the snapshot.  
+- Introduce an intermediate representation, allowing for on the fly decoding, which can be useful for operational tooling 
+
+The features I don't see changing are:
+
+- single threaded access only
+- the type restrictions. There's not much need for more complex types in a typical financial system
+- use of Agrona DirectBuffers
+
+[^1]: See [Aeron Cookbook on Cluster Performance Limits](https://aeroncookbook.com/aeron-cluster/performance-limits/?utm_source=shaunlaurens.com&utm_medium=web&utm_campaign=eiderretro)
+

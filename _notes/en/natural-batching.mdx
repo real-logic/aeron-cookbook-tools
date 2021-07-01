@@ -1,0 +1,53 @@
+---
+category: 'note'
+cover: './top.jpg'
+title: 'Natural batching'
+subtitle: 'Adaptive batching for increased throughput and low average latency'
+description: 'Adaptive batching for increased throughput and low average latency'
+date: '2020-12-13'
+tags: ['Distributed Systems']
+published: true
+state: draft
+updated: '2020-12-13'
+importance: low
+evergreen: 🌿
+series: 
+seriesurl: 
+review: continuous
+---
+
+Also known as Smart Batching. There isn't much in the academic literature that I've found on this topic (perhaps there is another name?), but natural batching can be a highly effective mechanism to increase systems throughput while also keeping average latency low. The way it works is deceptively simple.
+
+Let's consider the following scenario - we have a thread that is producing data, and another thread consuming data. The rate at which the producer adds data is random (for example, as a result of an external network process), and the consumer may take a varied amount of time to process the data as well. There are three mechanisms we can deploy for the consumer to accept data:
+
+- take one item at a time;
+- process n items at a time, waiting until either n items are available or a timer expires before processing;
+- and natural batching, in which the consumer takes *up to* n items without waiting.
+
+What tends to happen with natural batching is that during normal steady state processing, batches are small - sometimes only a single item. As the producer bursts, or the consumer slows down, batch sizes elastically increase up to the maximum number of items. Once conditions return to normal, batch sizes drop back down to low numbers. So we're seeing the best of both worlds - no waits, and thus lower latency, with a smooth running system, and batches to increase throughput as conditions demand.
+
+The Ring Buffer implementations in Agrona, Subscriptions in Aeron, LMAX's Disruptor and other libraries offer support for natural batching. 
+
+Note that [Backpressure](/note/backpressure) must be taken into account.
+
+---
+
+## References
+
+
+<div class="flex flex-row p-2 rounded-md">
+<div class="pr-2">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+</svg>
+</div>
+<div>Martin Thompson: <a href="https://mechanical-sympathy.blogspot.com/2011/10/smart-batching.html">Smart Batching</a>.
+</div>
+</div>
+
+ 
+---
+
+## Change log
+
+- Added 13 December 2020 

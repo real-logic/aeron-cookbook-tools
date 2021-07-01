@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title><![CDATA[Shaun Laurens]]></title>
+        <description><![CDATA[Shaun Laurens]]></description>
+        <link>https://www.shaunlaurens.com</link>
+        <generator>TypeScript</generator>
+        <lastBuildDate>Thu, 01 Jul 2021 11:56:59 GMT</lastBuildDate>
+        <atom:link href="https://www.shaunlaurens.com/feed.xml" rel="self" type="application/rss+xml"/>
+        <item>
+            <title><![CDATA[Eider Retrospective]]></title>
+            <description><![CDATA[Lessons learnt building Eider, and some considerations for a version 2]]></description>
+            <link>https://www.shaunlaurens.com/article/eider-retrospective</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/article/eider-retrospective</guid>
+            <pubDate>Sun, 29 Nov 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[How to See the Aurora in Iceland]]></title>
+            <description><![CDATA[Things to do to get the best chance to see and photograph the Aurora in Iceland]]></description>
+            <link>https://www.shaunlaurens.com/article/aurora-iceland</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/article/aurora-iceland</guid>
+            <pubDate>Thu, 30 Jan 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[State Transfer with Merkle Trees]]></title>
+            <description><![CDATA[Efficient DirectBuffer state transfer with Viewstamped Replication's recovery protocol]]></description>
+            <link>https://www.shaunlaurens.com/article/efficient-state-transfer-with-merkle-trees</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/article/efficient-state-transfer-with-merkle-trees</guid>
+            <pubDate>Sun, 29 Nov 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Chain Replication, Craq & Hermes]]></title>
+            <description><![CDATA[Highly available cluster coordination with high throughput and strong consistency guarantees]]></description>
+            <link>https://www.shaunlaurens.com/article/chain-replication-craq</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/article/chain-replication-craq</guid>
+            <pubDate>Sun, 20 Dec 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Gateway Distribution]]></title>
+            <description><![CDATA[Retaining high performance in an Aeron Cluster when dealing with large amounts of clients]]></description>
+            <link>https://www.shaunlaurens.com/article/gateway-distribution</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/article/gateway-distribution</guid>
+            <pubDate>Sat, 07 Nov 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Flyweights - Complexities with Variable Length Fields and Nulls]]></title>
+            <description><![CDATA[Different approaches as seen in Simple Binary Encoding, Cap'n Proto and database engines]]></description>
+            <link>https://www.shaunlaurens.com/article/flyweight-repeating-groups-and-nulls</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/article/flyweight-repeating-groups-and-nulls</guid>
+            <pubDate>Sun, 18 Apr 2021 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Why Kafka's Latency Is so High]]></title>
+            <description><![CDATA[And how Aeron avoids this]]></description>
+            <link>https://www.shaunlaurens.com/article/kafka-latency-so-high</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/article/kafka-latency-so-high</guid>
+            <pubDate>Sun, 21 Mar 2021 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Kafka Vs. Aeron]]></title>
+            <description><![CDATA[Two similar, yet very different approaches to log replication]]></description>
+            <link>https://www.shaunlaurens.com/article/kafka-vs-aeron</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/article/kafka-vs-aeron</guid>
+            <pubDate>Sun, 15 Nov 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Low Latency Replication with Replicated State Machines]]></title>
+            <description><![CDATA[Leveraging Aeron for low latency replication]]></description>
+            <link>https://www.shaunlaurens.com/article/low-latency-replication-with-replicated-state-machine</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/article/low-latency-replication-with-replicated-state-machine</guid>
+            <pubDate>Sat, 05 Dec 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Producer Backpressure in Messaging Systems]]></title>
+            <description><![CDATA[A survey of various messaging systems, and how they deal with fast producers/slow consumers]]></description>
+            <link>https://www.shaunlaurens.com/article/producer-backpressure-survey</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/article/producer-backpressure-survey</guid>
+            <pubDate>Sun, 22 Nov 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Failure Detection in Cloud Hosted Trading Systems]]></title>
+            <description><![CDATA[An overview of complexities and recommendations for failure detection in cloud hosted trading systems]]></description>
+            <link>https://www.shaunlaurens.com/article/failure-detection-in-cloud-trading-systems</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/article/failure-detection-in-cloud-trading-systems</guid>
+            <pubDate>Sun, 04 Apr 2021 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Photographing Iceland]]></title>
+            <description><![CDATA[Recommendations on planning a trip, and the gear to take with on a photographic tour of Iceland.]]></description>
+            <link>https://www.shaunlaurens.com/article/photographing-iceland</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/article/photographing-iceland</guid>
+            <pubDate>Mon, 30 Dec 2019 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Distributed System Faults]]></title>
+            <description><![CDATA[The core types of faults encountered with distributed systems]]></description>
+            <link>https://www.shaunlaurens.com/note/distributed-systems-faults</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/note/distributed-systems-faults</guid>
+            <pubDate>Sun, 13 Dec 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Unexpected Slowdowns in the Cloud]]></title>
+            <description><![CDATA[Techniques to achieve fail fast with slowdowns]]></description>
+            <link>https://www.shaunlaurens.com/note/cloud-slowdowns</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/note/cloud-slowdowns</guid>
+            <pubDate>Sat, 27 Mar 2021 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Backpressure]]></title>
+            <description><![CDATA[Backpressure explained, and how it is deployed to build stable distributed systems]]></description>
+            <link>https://www.shaunlaurens.com/note/backpressure</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/note/backpressure</guid>
+            <pubDate>Sat, 12 Dec 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Flyweights]]></title>
+            <description><![CDATA[An alternative to plain old Java objects often deployed when performance is critical]]></description>
+            <link>https://www.shaunlaurens.com/note/flyweights</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/note/flyweights</guid>
+            <pubDate>Sun, 13 Dec 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Hotspot Disassembler (Hsdis)]]></title>
+            <description><![CDATA[Building hsdis on Ubuntu and macOS]]></description>
+            <link>https://www.shaunlaurens.com/note/hotspot-dissambler</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/note/hotspot-dissambler</guid>
+            <pubDate>Wed, 10 Mar 2021 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Translation Lookaside Buffer (Tlb)]]></title>
+            <description><![CDATA[Understanding the TLB and the impacts it has on application performance]]></description>
+            <link>https://www.shaunlaurens.com/note/cpu-tlb</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/note/cpu-tlb</guid>
+            <pubDate>Thu, 10 Dec 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Lamport Clocks]]></title>
+            <description><![CDATA[Logical clocks for defining order in distributed systems]]></description>
+            <link>https://www.shaunlaurens.com/note/lamport-clocks</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/note/lamport-clocks</guid>
+            <pubDate>Fri, 11 Dec 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Natural Batching]]></title>
+            <description><![CDATA[Adaptive batching for increased throughput and low average latency]]></description>
+            <link>https://www.shaunlaurens.com/note/natural-batching</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/note/natural-batching</guid>
+            <pubDate>Sun, 13 Dec 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Replicated State Machines]]></title>
+            <description><![CDATA[Understand the heart of most fault tolerant distributed systems]]></description>
+            <link>https://www.shaunlaurens.com/note/replicated-state-machines</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/note/replicated-state-machines</guid>
+            <pubDate>Sat, 12 Dec 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Resilient Gateways]]></title>
+            <description><![CDATA[Adding resilience to Aeron Cluster Gateways]]></description>
+            <link>https://www.shaunlaurens.com/article/resilient-gateways</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/article/resilient-gateways</guid>
+            <pubDate>Fri, 30 Oct 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Split Brain]]></title>
+            <description><![CDATA[A danger to all correct clustered replicated state machines]]></description>
+            <link>https://www.shaunlaurens.com/note/split-brain</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/note/split-brain</guid>
+            <pubDate>Sun, 13 Dec 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Merkle Trees]]></title>
+            <description><![CDATA[Useful to verify any kind of data stored, handled and transferred in and between computers]]></description>
+            <link>https://www.shaunlaurens.com/note/merkle-trees</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/note/merkle-trees</guid>
+            <pubDate>Tue, 08 Dec 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Primary-Backup Replication]]></title>
+            <description><![CDATA[A popular technique to give fail-stop fault tolerance to a replicated state machine]]></description>
+            <link>https://www.shaunlaurens.com/article/primary-backup</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/article/primary-backup</guid>
+            <pubDate>Sun, 13 Dec 2020 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Sequencers]]></title>
+            <description><![CDATA[Overview of three types of fixed total order broadcast sequencers]]></description>
+            <link>https://www.shaunlaurens.com/note/sequencers</link>
+            <guid isPermaLink="true">https://www.shaunlaurens.com/note/sequencers</guid>
+            <pubDate>Sat, 19 Dec 2020 00:00:00 GMT</pubDate>
+        </item>
+    </channel>
+</rss>

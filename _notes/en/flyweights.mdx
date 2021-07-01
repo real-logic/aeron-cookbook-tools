@@ -1,0 +1,103 @@
+---
+category: 'note'
+cover: './top.jpg'
+title: 'Flyweights'
+subtitle: 'An alternative to plain old Java objects often deployed when performance is critical'
+description: 'An alternative to plain old Java objects often deployed when performance is critical'
+date: '2020-12-13'
+tags: ['Distributed Systems']
+published: true
+state: draft
+updated: '2021-04-03'
+importance: low
+evergreen: 🌳
+series: 
+seriesurl: 
+review: continuous
+---
+
+When we are moving data between two processes we typically will serialize data before putting it onto the network buffer and then deserialize it again after reading from the network buffer.
+Unless you have specific network observability requirements, there typically isn't a technical reason for putting formats like JSON between components of the same system - at the end of the day, it is just bytes being moved between processes.
+To increase performance we can move data between processes without any serialization or deserialization. Using Agrona's DirectBuffer you can read and write data out of buffers using Flyweights in tens to hundreds of nanoseconds.
+
+Flyweights offer one technique for doing this. The way they work is by reading the data of types directly from the byte buffers. To read data from a byte buffer, you simply move the Flyweight onto the correct location on the byte buffer, and then start reading. Each field read/written is at an offset from the initial offset.
+
+### Reading the data
+```java
+DirectBuffer buffer;
+int initialOffset;
+final FIELD_ONE_OFFSET = 0;
+final FIELD_TWO_OFFSET = Short.getBytes(); //byte length of fieldOne
+...
+public void setBuffer(int initialOffset, DirectBuffer buffer)
+{
+    this.buffer = buffer;
+    this.initialOffset = initialOffset;
+}
+
+public short getFieldOne()
+{
+    return buffer.getShort(initialOffset + FIELD_ONE_OFFSET);
+}
+    
+public int getFieldTwo()
+{
+    return buffer.getInt(initialOffset + FIELD_TWO_OFFSET);
+}
+...
+```
+
+Note that the object does not hold any internal state for the values of `fieldOne` or `fieldTwo`.
+
+### Writing the data
+```java
+MutableDirectBuffer mutableBuffer;
+int initialOffset;
+final FIELD_ONE_OFFSET = 0;
+final FIELD_TWO_OFFSET = Short.getBytes(); //byte length of fieldOne
+...
+public void setBuffer(int initialOffset, MutableDirectBuffer buffer)
+{
+    this.buffer = buffer;
+    this.initialOffset = initialOffset;
+}
+
+public void writeFieldOne(short value) 
+{
+    mutableBuffer.putShort(initialOffset + FIELD_ONE_OFFSET, value);
+}
+
+public void writeFieldTwo(int value) 
+{
+    mutableBuffer.putInt(initialOffset + FIELD_TWO_OFFSET, value);
+}
+...    
+```
+
+### Notes
+
+- Beware flyweight reuse - if you leave the Flyweight pointing at the wrong portion on the buffer, you would be reading or writing to the wrong object. Code reviews etc. need to be much more careful. 
+- This approach also works well with message passing between threads, for example when using Aeron IPC.
+- Some data types have no support - a good example is BigDecimal. You'll need to decide how you want that to be encoded.
+- If you're using a messaging system such as Aeron, you can achieve zero-copy processing by simply placing the flyweight object over the buffer provided in the FragmentHandler. Note that you would have had to solve the demuxing problem first.
+- Versioning can be tricky with Flyweights, especially as you deploy different versions of components on the same network. Consider using [Simple Binary Encoding](https://github.com/real-logic/simple-binary-encoding) (SBE), which has versioning capabilities built in.
+- While not strictly necessary (unless you're using SBE), reading and writing Flyweights sequentially can significantly improve performance as they respect the [Transaction lookaside buffer](/note/cpu-tlb)
+- Keep the read as logic free as possible. Just read the object in one step, and then process it.  
+- Beware the performance impact of Java Strings. If you're just trying to move something like a CUSIP or ISIN, consider using convertors such as `Base40LongConverter` in [Chronicle Wire](https://github.com/OpenHFT/Chronicle-Wire) which can encode short strings into standard Java long types.
+- This approach is used with several financial venues in their public APIs - for example, ITCH and OUCH from NASDAQ, TOPS and DEEP from IEX and MEMX's API. 
+- There are various techniques on how repeating groups and structured types are encoded. SBE and ITCH for example are fairly similar. The exact approach will depend on your data and system requirements.
+- If you're changing CPU endianness as you cross system boundaries, be sure to standardize onto one, fixed approach. Agrona `MutableDirectBuffer` `get` and `set` methods have capabilities for this.  
+- [Cap'n Proto](https://capnproto.org) offers a similar serialization free approach
+
+---
+
+## See also
+
+- [Flyweights - Complexities with variable length fields and nulls](/article/flyweight-repeating-groups-and-nulls/)
+
+---
+
+## Change log
+
+- Added 13 December 2020
+- Updated 3 April 2021 with note on endianness 

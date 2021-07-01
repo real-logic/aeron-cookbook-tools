@@ -1,0 +1,156 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: 0.1em;
+    border-radius: 0.3em;
+    white-space: normal;
+}
+
+.prose h4 a {
+    font-weight: 600 !important;
+}
+
+.prose h2 a {
+    font-weight: 400 !important;
+}
+
+.prose h3 a {
+    font-weight: 500 !important;
+}
+
+code.inline-code,
+.inline-code {
+    display: inline;
+    vertical-align: baseline;
+    font-family: "sl-code";
+    color: #000;
+}
+
+.inline-code {
+}
+
+.line_number {
+    @apply mr-2 pr-2 text-gray-500 border-r border-gray-500 border-dotted;
+}
+
+
+pre::-webkit-scrollbar {
+    display: none;
+}
+
+pre {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+.footnote-code {
+    @apply font-code;
+}
+
+.prose pre {
+    @apply !ml-0 !mb-0 !pt-0 !mt-4 !pb-2 !ml-0 !pl-2 !pr-0 !mr-0 !text-base !bg-shaunnew-900 !text-white !leading-5;
+}
+
+.remark-code-title {
+    @apply px-5 py-3 font-mono text-sm font-bold text-gray-800 bg-gray-200 border border-b-0 border-gray-200 rounded-t;
+}
+
+.remark-code-title + pre {
+    @apply mt-0 rounded-t-none;
+}
+
+.mdx-marker {
+    @apply block px-4 -mx-4 bg-shaunnew-500 border-l-4 border-shaunother-100;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: #999 !important;
+    font-style: italic;
+}
+
+.token.punctuation {
+    color: #FFF !important;
+}
+
+.token.plain {
+    color: #FFF;
+}
+
+.token.namespace {
+    opacity: 0.7;
+}
+
+.token.property,
+.token.tag,
+.token.type-args,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #f5684d !important;
+}
+
+.token.selector,
+.token.attr-name,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color:  #d9931e !important;
+}
+
+.token.operator,
+.token.string,
+.token.tag.attr-value,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #ffffff !important;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #66d9ef !important;
+}
+
+.token.function,
+.token.class-name,
+.token[class*="class-name"],
+.token.boolean {
+    color: #e6db74 !important;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #FFFFFF !important;
+}
+
+.token.important,
+.token.bold {
+    font-weight: 700;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.toTheTopButton {
+    position: fixed;
+    width: 100%;
+    left: 72.5%;
+    bottom: 40px;
+    padding-bottom: 50px;
+    height: 20px;
+    font-size: 3rem;
+    z-index: 1;
+    cursor: pointer;
+    color: #f5684d;
+}

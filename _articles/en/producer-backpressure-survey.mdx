@@ -1,0 +1,163 @@
+---
+category: 'article'
+cover: './top.jpg'
+title: 'Producer Backpressure in Messaging Systems'
+subtitle: 'A survey of various messaging systems, and how they deal with fast producers/slow consumers'
+description: 'A survey of various messaging systems, and how they deal with fast producers/slow consumers'
+date: '2020-11-22'
+tags: ['Distributed Systems']
+published: true
+state: draft
+updated: '2021-03-21'
+importance: medium
+series:
+seriesurl:
+review: continuous
+---
+
+<div class="bg-shaunnew-400 p-4 mb-4 dark:text-black rounded-md">
+  <p class="font-bold">Summary</p>
+Back pressure from fast producers/slow consumers can be found in most messaging systems. These systems force the developer using the messaging system to either define the behavior, or to expect to be impacted in some way (such as message loss or having the send call blocked).
+Within the surveyed messaging systems, not one can deal with a producer process creating an infinite amount of data at any given emission rate, with finite buffers and a slow consumer without either facing data loss or blocking the producer.    
+</div>
+
+Developers coming from a REST or similar environment, may be mystified by back pressure, and have some expectations that the messaging system will solve all back pressure issues for them. 
+
+This article surveys different messaging systems and how they deal with fast producer/slow consumer back pressure. Messaging systems included in this survey:
+
+## Defining back pressure
+
+Wikipedia[^1] defines back pressure as "*resistance or force opposing the desired flow of fluid through pipes*", while the Reactive Manifesto[^2] defines it as "*When one component is struggling to keep-up, the system as a whole needs to respond in a sensible way. It is unacceptable for the component under stress to fail catastrophically or to drop messages in an uncontrolled fashion. Since it can’t cope and it can’t fail it should communicate the fact that it is under stress to upstream components and so get them to reduce the load*"  
+
+## Messaging system survey
+
+The survey is focused on the core scenario of back pressure: producers that are producing data at a higher rate than consumers are consuming them.
+
+| Vendor | Blocks on send | Blocks on back pressure | Data loss? |
+| ----| ---- | ---- | ---- |
+| Aeron | Partial (write to local Log Buffer) | Consumer | Developer |
+| Apache Kafka | Optional | Broker | Developer |
+| Apache ActiveMQ | Optional | Broker | Yes, if async |
+| Solace | Optional | Broker or Consumer | Developer or Yes |
+| Informatica Ultra Messaging | If Source Paced | Consumer if Receiver Paced | Developer |
+| Tibco FTL | If Blocking Send | No | Yes, if Non-blocking Send |
+| RabbitMQ | If back pressured | Yes | No |
+
+Notes:
+- *Developer should be taken as a choice needs to be made by the developer. The developer may elect to drop the message, store in a secondary buffer etc.*
+- *Broker back pressure is applied if the publishing application is writing faster than the broker can accept*
+- *Consumer back pressure is applied if the publishing application is writing faster than the consumer can accept*
+
+### Aeron
+
+Back pressure is explicitly exposed to the developer whenever offering data to a Publication[^3]. As the developer, you're able to control both the initial window buffer sizes plus the size of the log buffer for the particular Publication. Once these are buffers are exceeded, and the developer attempts to offer more data, Aeron will apply back pressure.
+
+```java
+//assumes Aeron & Media Driver are setup
+final String channel = "aeron:udp?endpoint=10.10.123.241:12345";
+Publication publication = aeron.addPublication(channel, 10));
+...
+DirectBuffer toSend = ...
+...
+var result = publication.offer(toSend);
+```
+
+If the result returned by the call to `publication.offer` is `-2`, then the offer has been back pressured. The developer now needs to make a choice such as drop the message, retry, disconnect the slow consumer, or even reconsider the protocol design.
+
+With Aeron, back pressure behavior is consistent across transports (UDP, UDP Multicast and IPC). This makes it easier to compose and decompose systems into different processes layouts with minimal code change. Some other vendors have per transport behavior (e.g. IPC may differ to UDP). 
+
+### Apache Kafka
+
+If Kafka is set up such that messages are ordered, `acks` is set to either the leader broker (`acks=1`) or all brokers (`acks=-1`), and you've exceeded the buffer space in `buffer.memory`, and the timeout of `max.block.ms` has passed, you will not be able to send another message. Instead, you will receive a `TimeoutException` or `BufferExhaustedException` (depending on your Kafka version). This is Kafka back pressuring the producer.  
+
+```java
+final ProducerRecord<K, V> = new ProducerRecord<>(topic, key, value);
+producer.send(record, new Callback() {
+  public void onCompletion(RecordMetadata metadata, Exception e) {
+    if (e != null)
+      log.debug("error sending {}", record, e);
+  }
+});
+```
+
+As with Aeron, once a `TimeoutException` or `BufferExhaustedException` is raised, it is up to the developer to decide what to do. 
+
+### Apache Active MQ
+
+From ActiveMQ 5.0 onward, flow control is available in both the CORE and AMQP protocols. 
+This flow control fixes an issue with using pre 5.0 ActiveMQ broker's which used the TCP/IP stack to provide back pressure, since that would lead to scenarios where one badly behaved producer process could lead to all flows through the broker being blocked. The new flow control in the CORE and AMQP protocols behave slightly differently, but will can both block producers that are producing data at a rate that exceeds buffer/memory limits and the temporary or file system limits on the broker. 
+
+The behavior that occurs when a producer client is back pressured varies based upon the type of send being done:
+- synchronous sends will block (i.e. wait) until there is space available
+- asynchronous sends are simply dropped, without notification (i.e. the message is lost)
+
+See also:
+- [Active MQ docs on Producer Flow Control](https://activemq.apache.org/producer-flow-control.html)
+- [Active MQ docs on Flow Control](https://activemq.apache.org/components/artemis/documentation/latest/flow-control.html)
+
+### Solace
+
+Solace offers several options to deal with back pressure, or not, in a publisher.
+
+If the queue is using Direct messaging:
+
+- by default Direct messaging does not use storage on the event broker, and will result in message loss if the consumer is reading too slow, or is offline
+- you can optionally promote Direct messages such that they are stored on the event broker while ensuring that the publisher never gets back pressured. The event broker then stores them for consumers that go offline etc. up to broker storage configuration limits
+
+If the queue is using Persistent messaging:
+
+- by default, the messages are stored and acknowledged by the event broker. In this case, the consumer can backpressure the producer.
+- you can optionally demote Persistent messages, which means that they act like Direct messages, and can be subject to data loss. In this scenario, the consumer will not back pressure the producer, and will be subject to data loss
+
+If you're sending guaranteed messages, you have a choice between a blocking and non-blocking API:
+
+- *Blocking*: in this scenario, if local buffers are full, and the client cannot publish, then the API blocks until there is capacity in the buffer
+- *Non Blocking*: in this scenario, if the local buffers are full, the client returns an error that the API would block. At this point the client application could drop the message, or place it into an application layer buffer space. The client must await a callback that the client can now send, and can only then retry a publish action.
+
+See also:
+- [Solace Blocking vs. Non Blocking Publishing](https://solace.com/blog/blocking-vs-non-blocking-publish/)
+- [Solace documentation on Message Delivery Modes](https://docs.solace.com/PubSub-Basics/Core-Concepts-Message-Delivery-Modes.htm#Message3)
+- [Solace documentation on Publishing Guaranteed Messages](https://docs.solace.com/Solace-PubSub-Messaging-APIs/API-Developer-Guide/Publishing-Guaranteed-Messages.htm)
+- [Solace documentation on Sending Guaranteed Messages](https://docs.solace.com/Solace-PubSub-Messaging-APIs/API-Developer-Guide/Sending-Guaranteed-Messages.htm)
+
+### Informatica Ultra Messaging
+
+Informatica Ultra Messaging is a commercial product sometimes found within financial trading organisations. It offers multiple transports (TCP/IP, UDP, UDP Multicast and variants of IPC), and the exact mechanism of back pressure depends on the transport and how it is configured.
+
+Some transports offer a feature called Transport Pacing, with either one or both Source or Receiver Paced Transport Pacing supported. 
+
+- *Source Pacing*: In Ultra Messaging, this varies a bit by transport. Some transports provide configuration on how fast a source is allowed to produce data, in which case any call to send will either block or return an error indicating that limits are exceeded. If this limit is not turned on, or not available, then data is dropped once buffers are exceeded. Note that with Source Pacing there is no way for consumers to signal the producer to slow down. 
+- *Receiver Pacing*: This is the case when a producer is producing faster than a consumer can consume. In this case, the Ultra Messaging client will first consume local buffers, but once these buffers are exceeded, the producer will be blocked from sending more data until enough space has opened up in the buffers again.  
+
+In all scenarios without data loss, back pressure is an issue the developer must deal with.
+
+See also:
+- [Informatica Ultra Messaging Design document](https://ultramessaging.github.io/currdoc/doc/Design/html1/index.html#transportpacing)
+
+### Tibco FTL
+
+With Tibco's FTL messaging product, messaging system administrators must decide what happens when producer buffers are full. They have two options:
+
+- *Blocking Send*: in this case, when message bus is full, the send call will block and never return until such time as all outbound data is placed on the bus
+- *Non-blocking Send*: this is the default behavior. In this case, FTL transport will buffer outbound messages in the process memory. When buffers have space, the send call returns once the data is placed in buffer. If this buffer overflows, the transport discards the oldest messages in order to make space for the new messages.
+
+See also:
+- [Tibco FTL documentation](https://docs.tibco.com/products/tibco-ftl-enterprise-edition-6-5-0)
+
+### RabbitMQ
+
+RabbitMQ has automatic flow control in place to prevent publishers from overloading memory in the broker. This will slow down (i.e. block) publishers as needed.
+
+See also:
+- [RabbitMQ Flow Control](https://www.rabbitmq.com/flow-control.html)
+
+---
+
+## Change log
+
+- Published 22 November 2020
+- Minor update 21 March 2021
+
+[^1]: Wikipedia article, see [here](https://en.wikipedia.org/wiki/Back_pressure)
+[^2]: Reactive Manifesto [Glossary](https://www.reactivemanifesto.org/glossary#Back-Pressure)
+[^3]: See Aeron Cookbook on [offer](https://aeroncookbook.com/aeron/publications-subscriptions/#offer) and [back-pressure](https://aeroncookbook.com/aeron/publications-subscriptions/#back-pressure)

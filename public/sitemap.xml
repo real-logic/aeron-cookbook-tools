@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://www.shaunlaurens.com/article/aurora-iceland</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/article/chain-replication-craq</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc
+      >https://www.shaunlaurens.com/article/efficient-state-transfer-with-merkle-trees</loc
+    >
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/article/eider-retrospective</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc
+      >https://www.shaunlaurens.com/article/failure-detection-in-cloud-trading-systems</loc
+    >
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc
+      >https://www.shaunlaurens.com/article/flyweight-repeating-groups-and-nulls</loc
+    >
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/article/gateway-distribution</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/article/kafka-latency-so-high</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/article/kafka-vs-aeron</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc
+      >https://www.shaunlaurens.com/article/low-latency-replication-with-replicated-state-machine</loc
+    >
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/article/photographing-iceland</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/article/primary-backup</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/article/producer-backpressure-survey</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/article/resilient-gateways</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/note/backpressure</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/note/cloud-slowdowns</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/note/cpu-tlb</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/note/distributed-systems-faults</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/note/flyweights</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/note/hotspot-dissambler</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/note/lamport-clocks</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/note/merkle-trees</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/note/natural-batching</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/note/replicated-state-machines</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/note/sequencers</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://www.shaunlaurens.com/note/split-brain</loc>
+    <lastmod>2021-07-01</lastmod>
+  </url>
+</urlset>

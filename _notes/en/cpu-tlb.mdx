@@ -1,0 +1,194 @@
+---
+category: 'note'
+cover: './top.jpg'
+title: 'Translation lookaside buffer (TLB)'
+description: 'Understanding the TLB and the impacts it has on application performance'
+subtitle: 'Understanding the TLB and the impacts it has on application performance'
+date: '2020-12-10'
+tags: ['Hardware']
+published: true
+state: draft
+updated: '2021-03-10'
+importance: low
+evergreen: 🌿
+series: hardware
+seriesurl: hardware
+review: continuous
+---
+
+import Series from '../../components/Series';
+
+The transaction lookaside buffer (also known as the TLB - not to be confused with Java's Thread Local Buffer) is one of the core cache components of a modern CPU, along with the data and instruction caches. 
+The TLB's role is to help the CPU very quickly lookup the address in physical memory of a virtualized memory page. At the hardware level, the TLB is typically constructed much like a least-recently-used cache. There are typically multiple levels of TLBs, which are sometimes divided by instructions (iTLB) and data (dTLB) in L1 caches, but tend to be unified in L2 and other caches. Note that each TLB has a limited number of entries, so to extract the highest performance, the goal is to increase the hit ratio as much as possible. 
+
+When we construct a high amount of threads (depends on the hardware and if virtualization is used, but consider this to be tens to hundreds of threads) in a system, the system is likely to suffer severe performance problems as the costs of lock contention, scheduler overheads and having to continuously refresh the TLB and lookup the correct memory page weigh the system down.
+
+If we instead build the system in a TLB friendly manner, we can extract very high performance. *As with all claims made on performance, they should be properly validated within the context of your environment*.
+
+To be TLB friendly, try to:
+
+- stride sequentially through your application's memory (forwards or backwards, CPU's don't mind which). Avoid random access. Cache prefetching (which is typically done at a mix of hardware and software layer) works best with sequentially accessed memory.
+- use threads with care
+- consider your object layout in memory. Using standard POJOs stored in a hashmap or similar might well involve random access. Explicitly managing your memory via off-heap structures can result in much more predictable memory layout, and thus higher and/or more stable performance.
+- if you're using virtualized hardware, being TLB friendly can significantly help application performance 
+- if you're running on Linux, take a look at Transparent Huge Pages
+
+One option to measure Java source code's TLB friendliness is to make use of Linux `perf`. This can be integrated into JMH, via the `LinuxPerfNormProfiler`. To make use of this, you will need to run on a physical Linux machine, and have installed `perf`.
+
+Sample outputs from the profiler, with both dTLB and iTLB data:
+
+```bash
+Benchmark                                        Mode      Cnt       Score   Error      Units
+createRfqRoundtrip:CPI                         sample     2000       0.245          clks/insn
+createRfqRoundtrip:IPC                         sample     2000       4.078          insns/clk
+createRfqRoundtrip:L1-dcache-load-misses       sample     2000       0.005               #/op
+createRfqRoundtrip:L1-dcache-loads             sample     2000      79.518               #/op
+createRfqRoundtrip:L1-dcache-stores            sample     2000      29.214               #/op
+createRfqRoundtrip:L1-icache-load-misses       sample     2000       0.008               #/op
+createRfqRoundtrip:LLC-load-misses             sample     2000      ≈ 10⁻³               #/op
+createRfqRoundtrip:LLC-loads                   sample     2000       0.002               #/op
+createRfqRoundtrip:LLC-store-misses            sample     2000      ≈ 10⁻⁴               #/op
+createRfqRoundtrip:LLC-stores                  sample     2000      ≈ 10⁻³               #/op
+createRfqRoundtrip:branch-misses               sample     2000       0.008               #/op
+createRfqRoundtrip:branches                    sample     2000      44.329               #/op
+createRfqRoundtrip:cycles                      sample     2000      65.693               #/op
+createRfqRoundtrip:dTLB-load-misses            sample     2000      ≈ 10⁻⁴               #/op
+createRfqRoundtrip:dTLB-loads                  sample     2000      79.381               #/op
+createRfqRoundtrip:dTLB-store-misses           sample     2000      ≈ 10⁻⁴               #/op
+createRfqRoundtrip:dTLB-stores                 sample     2000      29.191               #/op
+createRfqRoundtrip:iTLB-load-misses            sample     2000      ≈ 10⁻⁴               #/op
+createRfqRoundtrip:iTLB-loads                  sample     2000       0.001               #/op
+createRfqRoundtrip:instructions                sample     2000     267.926               #/op
+```
+
+---
+
+## Backlinks
+
+<div class="flex flex-row p-2 rounded-md">
+    <div class="pr-2">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+</svg>
+    </div>
+    <div>
+         <a href="../../note/flyweights/">Flyweights</a>
+    </div>
+</div>
+
+---
+
+## References
+
+<div class="flex flex-row p-2 rounded-md">
+<div class="pr-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+  <path fill="#EFF7FE" d="M12 14l9-5-9-5-9 5 9 5z" />
+  <path fill="#EFF7FE" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+</svg>
+</div>
+<div>M. Walsh: <a href="http://www.sosp.org/2001/papers/welsh.pdf" target="_blank">SEDA: An Architecture for Well-Conditioned, Scalable Internet Services</a>
+</div>
+</div>
+<div class="flex flex-row p-2 rounded-md">
+<div class="pr-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+  <path fill="#EFF7FE" d="M12 14l9-5-9-5-9 5 9 5z" />
+  <path fill="#EFF7FE" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+</svg>
+</div>
+<div>Ulrich Drepper, RedHat: <a href="https://people.freebsd.org/~lstewart/articles/cpumemory.pdf" target="_blank">What every developer should know about memory</a>
+</div>
+</div>
+
+<div class="flex flex-row p-2 rounded-md">
+<div class="pr-2">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+</svg>
+</div>
+<div>Benjamin J. Evans, James Gough, and Chris Newland: Optimizing Java, 2018. Published by O’Reilly Media, Inc.
+</div>
+</div>
+
+<div class="flex flex-row p-2 rounded-md">
+<div class="pr-2">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+</svg>
+</div>
+<div>Brendan Gregg: Systems Performance Second Edition, 2021. Published by Pearson Education
+</div>
+</div>
+
+<div class="flex flex-row p-2 rounded-md">
+<div class="pr-2">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+</svg>
+</div>
+<div>Scott Oaks: Java Performance 2nd Edition, 2020. Published by O’Reilly Media, Inc.
+</div>
+</div>
+
+
+<div class="flex flex-row p-2 rounded-md">
+<div class="pr-2">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+</svg>
+</div>
+<div>Vijay Nagarajan, Daniel J. Sorin, Mark D. Hill, and David A. Wood: A Primer on Memory Consistency and Cache Coherence 2nd Edition, 2020. Published by Morgan & Claypool.
+</div>
+</div>
+
+
+<div class="flex flex-row p-2 rounded-md">
+<div class="pr-2">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2000 0 012 2v1a2 2000 0 002 2000 2 2000 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2000 0 012 2000 2 2000 0 104 0 2000 2 0 012-2h1.064M15 20.488V18a2 2000 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+</svg>
+</div>
+<div>
+Aleksey Shipilёv: <a href="https://shipilev.net/jvm/anatomy-quarks/2-transparent-huge-pages/">JVM Anatomy Quark #2: Transparent Huge Pages</a>.
+</div>
+</div>
+
+<div class="flex flex-row p-2 rounded-md">
+<div class="pr-2">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2000 0 012 2v1a2 2000 0 002 2000 2 2000 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2000 0 012 2000 2 2000 0 104 0 2000 2 0 012-2h1.064M15 20.488V18a2 2000 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+</svg>
+</div>
+<div>Martin Thompson: <a href="https://mechanical-sympathy.blogspot.com/2012/10/compact-off-heap-structurestuples-in.html">Compact Off-Heap Structures/Tuples In Java</a>.
+</div>
+</div>
+
+<div class="flex flex-row p-2 rounded-md">
+<div class="pr-2">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2000 0 012 2v1a2 2000 0 002 2000 2 2000 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2000 0 012 2000 2 2000 0 104 0 2000 2 0 012-2h1.064M15 20.488V18a2 2000 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+</svg>
+</div>
+<div>Martin Thompson: <a href="https://mechanical-sympathy.blogspot.com/2012/08/memory-access-patterns-are-important.html">Memory access patterns are important</a>.
+</div>
+</div>
+
+<div class="flex flex-row p-2 rounded-md">
+<div class="pr-2">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2000 0 012 2v1a2 2000 0 002 2000 2 2000 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2000 0 012 2000 2 2000 0 104 0 2000 2 0 012-2h1.064M15 20.488V18a2 2000 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+</svg>
+</div>
+<div>Brendan Gregg: <a href="http://www.brendangregg.com/perf.html">perf Examples</a>.
+</div>
+</div>
+
+ 
+---
+
+## Change log
+
+- Added 10 December 2020 
+- Updated 13 December 2020 - added Brendan Gregg's *Systems Performance* book and links to *perf Examples* + Martin Thompson's *Memory access patterns are important* 
+- Updated 10 March 2021 - added sample JMH `LinuxPerfNormProfiler` output. 

@@ -1,0 +1,136 @@
+---
+category: 'article'
+cover: './top.jpg'
+title: 'State transfer with Merkle trees'
+description: 'Efficient DirectBuffer state transfer with Viewstamped Replication''s recovery protocol'
+subtitle: 'Using Merkle trees for low-urgency binary buffer synchronization'
+date: '2020-11-29'
+tags: ['Distributed Systems']
+published: true
+state: draft
+updated: '2020-12-13'
+importance: low
+series: 
+seriesurl: 
+review: continuous
+---
+
+<div class="bg-shaunnew-400 p-4 mb-4 rounded-md dark:text-black">
+  <p class="font-bold">Summary</p>
+  <p>If performance requirements demand it, computations can be shifted from clusters to cluster clients. Doing this typically requires some amount of shared state between the cluster and cluster clients, but there is no out of the box solution to replicate this data efficiently. Merkle tree supported state transfer can be a useful technique for efficiently replicating slowly changing data from the cluster to read-only cluster clients. This works especially well with DirectBuffer hosted data, such as an off heap repository.</p>
+  <p class="italic">Scenarios where this approach should be avoided, and the replicated state machine approach rather used:</p>
+  <p><ul>
+  <li>if the underlying buffer has frequent updates that are typically very small and sparse - such as a few bytes getting changed every few thousand bytes. This would result in a large volume of page transfers to mutate small pieces of data.</li>
+  <li>if the underlying dataset cannot be represented as a binary buffer - for example, it is held as a list of POJOs. In that case, state transfer remains possible by simply sending over the current state of POJOs, but Merkle trees would either not be of much help, or would require extensive serialization.</li>
+  <li>if the system needs near immediate updates. The Merkle tree approach is best suited for occasional replication, or replication following the application of a number of batch updates.</li>
+    </ul>
+  </p>
+
+See also:
+<div class="flex flex-row p-2 rounded-md">
+    <div class="pr-2">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+</svg>
+    </div>
+    <div>
+         🌿 <a href="../../note/merkle-trees/">Merkle Trees explained</a>
+    </div>
+</div>
+
+</div>
+
+
+In order to improve a clustered system's throughput, we may wish to move some computation from the cluster to the edges. To do this, you typically need reference data available - data such as instruments, permissions etc. that are either not changing or are slowly changing. Replicating this data can be difficult to do efficiently - especially if you're working with off heap data structures.
+Aeron Cluster is itself running a replicated state machine within the Raft protocol, however, the Raft protocol does not include a mechanism for the replication of datasets (or byte buffers) from cluster to cluster clients.
+
+
+<div align="center">
+<svg width="80%" height="auto" viewBox="0 0 810 149" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="591" width="219" height="149" rx="6" fill="#5AC8FA"/>
+<text transform="translate(638 17)" fill="black" xml:space="preserve" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif" font-size="24" letter-spacing="0em"><tspan x="27.0938" y="23.14">Cluster</tspan></text>
+<rect x="663" y="60" width="80" height="41" rx="6" fill="#FFCC02"/>
+<text fill="black" xml:space="preserve" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif" font-size="24" letter-spacing="0em"><tspan x="673.719" y="87.14">State</tspan></text>
+<rect x="296" width="167" height="149" rx="6" fill="#FF5544"/>
+<rect width="167" height="149" rx="6" fill="#2ACC41"/>
+<path d="M592.069 35.0198C592.65 34.4293 592.642 33.4796 592.052 32.8986L582.429 23.4299C581.839 22.8489 580.889 22.8565 580.308 23.447C579.727 24.0375 579.735 24.9872 580.325 25.5683L588.878 33.9849L580.462 42.5383C579.881 43.1288 579.889 44.0785 580.479 44.6595C581.07 45.2406 582.019 45.2329 582.6 44.6424L592.069 35.0198ZM463.012 36.5L591.012 35.4677L590.988 32.4678L462.988 33.5L463.012 36.5Z" fill="black"/>
+<path d="M296.069 35.0198C296.65 34.4293 296.642 33.4796 296.052 32.8986L286.429 23.4299C285.839 22.8489 284.889 22.8565 284.308 23.447C283.727 24.0375 283.735 24.9872 284.325 25.5683L292.878 33.9849L284.462 42.5383C283.881 43.1288 283.889 44.0785 284.479 44.6595C285.07 45.2406 286.019 45.2329 286.6 44.6424L296.069 35.0198ZM167.012 36.5L295.012 35.4677L294.988 32.4678L166.988 33.5L167.012 36.5Z" fill="black"/>
+<path d="M461.939 122.939C461.354 123.525 461.354 124.475 461.939 125.061L471.485 134.607C472.071 135.192 473.021 135.192 473.607 134.607C474.192 134.021 474.192 133.071 473.607 132.485L465.121 124L473.607 115.515C474.192 114.929 474.192 113.979 473.607 113.393C473.021 112.808 472.071 112.808 471.485 113.393L461.939 122.939ZM591 122.5L463 122.5V125.5L591 125.5V122.5Z" fill="black"/>
+<path d="M166.939 122.939C166.354 123.525 166.354 124.475 166.939 125.061L176.485 134.607C177.071 135.192 178.021 135.192 178.607 134.607C179.192 134.021 179.192 133.071 178.607 132.485L170.121 124L178.607 115.515C179.192 114.929 179.192 113.979 178.607 113.393C178.021 112.808 177.071 112.808 176.485 113.393L166.939 122.939ZM296 122.5L168 122.5V125.5L296 125.5V122.5Z" fill="black"/>
+<path d="M419.944 78.935C419.356 79.5183 419.352 80.4681 419.935 81.0563L429.441 90.6416C430.025 91.2298 430.974 91.2337 431.563 90.6503C432.151 90.067 432.155 89.1172 431.571 88.529L423.121 80.0088L431.642 71.5586C432.23 70.9753 432.234 70.0255 431.65 69.4373C431.067 68.8491 430.117 68.8452 429.529 69.4286L419.944 78.935ZM663.006 79.5L421.006 78.5L420.994 81.5L662.994 82.5L663.006 79.5Z" fill="black"/>
+<text fill="black" xml:space="preserve" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif" font-size="18" letter-spacing="0em"><tspan x="473.048" y="26.48">Commands</tspan></text>
+<text fill="black" xml:space="preserve" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif" font-size="18" letter-spacing="0em"><tspan x="501.382" y="118.48">Events</tspan></text>
+<text transform="translate(317 17)" fill="black" xml:space="preserve" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif" font-size="24" letter-spacing="0em"><tspan x="18.9609" y="23.14">Gateway</tspan></text>
+<text transform="translate(21 17)" fill="black" xml:space="preserve" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif" font-size="24" letter-spacing="0em"><tspan x="28.3594" y="23.14">Clients</tspan></text>
+<rect x="341" y="60" width="80" height="41" rx="6" fill="#FFCC02"/>
+<text fill="black" xml:space="preserve" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif" font-size="24" letter-spacing="0em"><tspan x="352.719" y="87.14">State</tspan></text>
+</svg>
+</div>
+
+There are two techniques available to replicate data across machines:
+- *state transfer*: this can be a blunt tool, and is typically used for replicating memory across machines. With state transfer, the process simply transfers the current state of the world - without caring about how the data was created or modified. Raft uses this approach for snapshot transfer from cluster leader to new cluster followers on start up.
+- *replicated state machines*: this is a finely grained approach, in which the exact set of operations performed are replicated across machines and replayed in the exact same order. The operations must be applied using deterministic logic. Raft uses this approach to apply changes to the cluster state once all snapshots are in place at follower nodes.
+
+To replicate a DirectBuffer from the cluster to cluster client, we could use either state transfer or a replicated state machine. Each approach has its own pros and cons. 
+
+- Replicated state machines are the better solution for transactional data or any other data which has a high sensitivity to being consistent across nodes within a short amount of time. The primary issue with replicating via replicated state machines to cluster clients is with late join scenarios. With this approach, all replicated state machine log entries would need to be replayed in order on top of a starting state and replayed through a deterministic process.  If you're running off of Aeron Archive for the transaction logs, you'd need to co-ordinate the replay and join onto an archive of operations performed. 
+- State transfer is best focused on slowly changing data, such as reference data that can safely be updated within seconds of a batch update. State transfer approach allows a client to join at any time, and, by using Merkle Trees - as in the Viewstamped Replication paper - the most efficient data replication data set is always computed. No snapshot is required.
+
+<div class="bg-danube-200 flex flex-row p-2 rounded-md">
+<div class="pr-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor">
+  <path fill="#EFF7FE" d="M12 14l9-5-9-5-9 5 9 5z" />
+  <path fill="#EFF7FE" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+</svg>
+</div>
+<div>See the <a href="http://pmg.csail.mit.edu/papers/vr-revisited.pdf" target="_blank">Viewstamped Replication Revisited</a> paper in the section discussing efficient recovery for the inspiration of this article. Note that in the paper the authors suggest transferring initial state using a disk based clone of the active replica if it is too large to move over the viewstamped replication protocol.
+</div>
+</div>
+
+### Repositories and the Merkle tree
+
+Repositories that are built atop byte buffers, such as found in Eider, would need some modifications to run efficiently with Merkle tree based synchronization. Most importantly, it helps to batch updates to the underlying buffer. For example, within an Aeron Cluster, you would accept a command and then 0..m updates would be applied to the underlying buffers. When recomputing the Merkle tree, it helps to understand which pages have been modified, and to take care to only recompute the nodes required.
+
+## State Transfer Process
+
+The state transfer process runs on either a cluster timer, or some other external input, and operates in four phases:
+
+1. The server process in Aeron Cluster prepares for a new state transfer, and initiates the client state transfer by sending the current server Merkle tree to all clients 
+2. Clients interpret the current state of the cluster, and request all changed pages
+3. The server responds to each client with the list of required pages
+4. Clients apply the pages to their local direct buffers, and the process completes.
+
+Phase 1 of the process operates as follows:
+
+- The server process within Aeron Cluster prepares a state transfer session for one or more repositories.
+- the server process holds a State Transfer Term per repository. When starting a new state transfer, the transfer term is incremented per repository. This is used to ensure that clients and the server process in Aeron Cluster are working on the same state transfer task   
+- shadow copies of the current Merkle tree plus the Direct Buffer per replicated repository are created. These copies are the source used for the state transfer term, allowing the Eider Repository to continue accepting changes while the state transfer continues. This ensures that all clients end up with the same buffer as was seen at the start of the state transfer term. 
+- the Aeron Cluster can then send the Merkle tree to the required Aeron Cluster Clients
+
+Aeron Clients that want to receive state transfer messages will need be wired up appropriately. For those that are wired up, phase 2 operates as follows:
+
+- The client will receive the message, and read the byte buffer parameters, the used page count, and the state transfer term
+- The client then compares the client side Eider Repository's Merkle against the one sent from the server. It compares each page's hash from top to bottom, only stepping deeper into the tree if there is a difference in the hash. If it finds differences, it can easily locate the pages which differ and take notes of all the pages that have changed.
+- The client sends a message to the Aeron Cluster with the state transfer term and all the pages that need to be transferred over.
+
+In phase 3, the Aeron Cluster hosted server process then completes the Aeron Cluster portion of the state transfer for a given session (i.e. Aeron Cluster client):
+
+- It first checks that the inbound client page state transfer request matches the current state transfer term; if not matching, it will reject by sending the current state transfer term data and buffer over - the clients will then redo the comparison, and request any changes as before but with the new state transfer term.
+- If the state transfer term matches, it reads the list of requested state transfer pages off the client request, and sends them along with the state transfer term to the remote client and page number.
+
+Finally, in phase 4, the state transfer then finishes on the client side:
+
+- After receiving the first state transfer page from the server on the same state transfer term, the client process will make a shadow copy of the replicated DirectBuffer. 
+- For each state transfer page, the client applies the change to the shadow buffer
+- Once every page is completely replicated (as checked by the list produced in the first client step), the client computes the new Merkle tree and verifies it against the server Merkle tree for the same state transfer term. It only needs to check the top level hash to know the contents are identical.
+- If everything matches as expected, the client replaces the underlying buffer in the Eider Repository, the Eider Repository rebuilds indexes, and the state transfer is complete.
+
+Note that some aspects were simplified in the above description - notably cases around timeouts. These are dealt with by the client side - once the client has responded with a request to perform state transfer, it is responsible for starting a timer to monitor the progress. This timer can be used for retries as needed. The server process in Aeron Cluster purposely uses as little resources as possible.
+
+---
+
+## Change log
+
+- Updated 5 December 2020 with a link to the Viewstamp Replication Revisited paper.
+- Updated 8 December 2020 with clarifications
+- Updated 13 December 2020 with link to Merkle tree note

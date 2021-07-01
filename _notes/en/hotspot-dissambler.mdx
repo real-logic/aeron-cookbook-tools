@@ -1,0 +1,124 @@
+---
+category: 'note'
+cover: './top.jpg'
+title: 'HotSpot Disassembler (hsdis)'
+subtitle: 'Building hsdis on Ubuntu and macOS'
+description: 'Building hsdis on Ubuntu and macOS'
+date: '2021-03-10'
+tags: ['Hardware']
+published: true
+state: draft
+updated: '2021-03-16'
+importance: low
+evergreen: 🌳
+series: 
+seriesurl: 
+review: continuous
+---
+
+Newer versions of the JDK do not include binaries for the HotSpot Disassembler. This is required if you're looking to make use of some JMH profilers, such as the Linux `perfasm` profiler, or just want to review the assembly generated for a given Java application using `-XX:+PrintAssembly` or `jitwatch`.
+These instructions have been tested with the OpenJDK 16 GA release on Ubuntu 20.04 and macOS Big Sur. 
+
+## Initial Prep
+
+The initial prep varies by operating system
+
+### Ubuntu 20.04
+
+First, ensure you have build essential tools installed.
+
+```bash
+sudo apt update
+sudo apt install build-essential
+```
+
+### macOS Big Sur
+
+First, ensure you have xcode command line tools installed.
+
+```bash
+sudo xcode-select --install
+```
+
+If you don't already have wget installed, this can be installed with Homebrew
+
+```bash
+brew install wget
+```
+
+## Building hsdis
+
+Next, clone the JDK repo:
+
+```bash
+git clone git@github.com:openjdk/jdk.git
+```
+
+Next, move into the JDK source folder, and then checkout the JDK 16-ga tag:
+
+```bash
+cd jdk
+git checkout jdk-16-ga
+```
+
+Next, move into the hsdis folder:
+
+```bash
+cd src/utils/hsdis
+```
+
+Next, get a copy of the GNU binutils from gnu.org:
+
+```bash
+wget https://ftp.gnu.org/gnu/binutils/binutils-2.35.tar.gz
+tar xvf binutils-2.35.tar.gz
+```
+
+Finally, build hsdis:
+
+```bash
+ make BINUTILS=binutils-2.35 ARCH=amd64
+```
+
+The remaining steps are going to vary by operating system. If you're making use of something like SDK Man, ensure that the correct JDK is set to current - given we're building hsdis for JDK 16, it'd need to be OpenJDK 16 (or equivalent from Azul etc.).
+
+## Installing hsdis to your JDK 
+
+### Ubuntu 20.04
+
+```bash
+sudo cp build/linux-amd64/hsdis-amd64.so $JAVA_HOME/lib/server
+```
+
+### macOS Big Sur
+
+```bash
+sudo cp build/macosx-amd64/hsdis-amd64.dylib $JAVA_HOME/lib/server
+```
+
+---
+
+## References
+
+<div class="flex flex-row p-2 rounded-md">
+<div className="pr-2">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24"
+     stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+</svg>
+</div>
+<div>
+OpenJDK Wiki: <a href="https://wiki.openjdk.java.net/display/HotSpot/PrintAssembly">HotSpot PrintAssembly</a>.
+</div>
+</div>
+
+
+
+
+---
+
+## Change log
+
+- Added 10 March 2021 
+- Updated 16 March 2021 for JDK 16

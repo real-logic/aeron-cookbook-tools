@@ -1,0 +1,378 @@
+---
+date: '2020-11-15'
+thumbnail: /assets/sliced-tomato-and-spring-onion-salad.jpeg
+title: Kafka vs. Aeron
+description: Two similar, yet very different approaches to log replication
+tags: ['Distributed Systems', 'Aeron', 'Kafka']
+published: true
+state: final
+updated: '2021-06-21'
+importance: medium
+series:
+seriesurl:
+review: continuous
+---
+
+## Overview
+
+There is some confusion about the similarities and differences between Kafka and Aeron. This article aims to help answer some questions.
+
+| Item | Kafka | Aeron |
+| :--- | :--- | :--- |
+| Simple producer-consumer flow | Kafka built in | Aeron |
+| Interprocess flows on same host | remote via Kafka | Aeron IPC |
+| One to many flow | Kafka built in | Aeron (multicast or MDC) |
+| Many to one flow | Kafka built in | Aeron |
+| Many to many flows | Kafka built in | Aeron (multicast or MDC as needed) |
+| Historical replay | Kafka built in | Aeron Archive |
+| Resilience to server failures | with Kafka Cluster + ZK Cluster | Aeron Archive[^archiveresilience] or Aeron Cluster |
+| Message Ordering | Optional within same producer session on a partition[^msgorder] | Guaranteed within same session on a channel+stream[^stream] |
+| Global Total Ordering | Not possible | Aeron Cluster |
+| Stream processing | Custom code + Kafka Streams | Custom code + Aeron Archive/Aeron Cluster |
+| Producer Style | Async or Sync (with partial or full cluster ack) | Sync (to local log buffer or Aeron Cluster majority) |
+| Consumer Style | Poll (with max blocking duration) | Poll (with max number of items) |
+| Optimised for | Small messages (1kb) | Small messages (1kb or less) |
+| Throughput | Millions of messages/second | Millions of messages/second |
+| Latency at 99.9th percentile | Sub-second, likely in hundreds of milliseconds | Aeron IPC: <1μs[^ipcmax]; Aeron[^aeronmax]/Aeron Archive[^archivemax]: 4-5μs; Aeron Cluster: <100μs[^clustermax] |
+| Batching support | Time and/or Size based[^kafkabatch] | Natural Batching[^naturalbatch] |
+| Largest message size | 1MB+[^kafkamsgsize] | 16MB[^aeronmsgsize] |
+| Production Deployment (excl producers and consumers) | 5-8+ servers | 0-3+ servers (Aeron Cluster is best with minimum 3 servers) |
+| Zero GC capable on hot path | No | Yes[^zgc] |
+
+## Architecture
+
+In the scenario where we want a simple producer-consumer flow which can deliver the absolute maximum performance in a production ready environment, the logical deployment architectures would be as follows:
+
+### Kafka Architecture
+
+<div align="center">
+  <svg width="60%" height="auto" viewBox="0 0 564 313" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <line x1="282" y1="57.995" x2="283.015" y2="260.995" stroke="black" stroke-width="2"/>
+    <line x1="131.003" y1="284" x2="430.003" y2="284.98" stroke="black" stroke-width="2"/>
+    <rect y="86" width="126" height="73" fill="#707aed"/>
+    <rect x="219" width="126" height="73" fill="#e89e00"/>
+    <rect x="219" y="86" width="126" height="73" fill="#e89e00"/>
+    <rect x="219" y="172" width="126" height="73" fill="#e89e00"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="23.9736" y="130.06">Producer</tspan></text>
+    <rect x="438" y="86" width="126" height="73" fill="#707aed"/>
+    <text fill="black" xml:space="preserve" font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="455.444" y="130.06">Consumer</tspan></text>
+    <text fill="black" xml:space="preserve" font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="256.932" y="33.06">Kafka&#10;</tspan><tspan x="253.333" y="58.06">Broker</tspan></text>
+    <text fill="black" xml:space="preserve" font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="256.932" y="119.06">Kafka&#10;</tspan><tspan x="253.333" y="144.06">Broker</tspan></text>
+    <text fill="black" xml:space="preserve" font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="256.932" y="204.06">Kafka&#10;</tspan><tspan x="253.333" y="229.06">Broker</tspan></text>
+    <rect x="56" y="258" width="77" height="55" fill="#d6658e"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="82.3569" y="293.06">ZK</tspan></text>
+    <rect x="151" y="258" width="77" height="55" fill="#d6658e"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="177.357" y="293.06">ZK</tspan></text>
+    <rect x="246" y="258" width="77" height="55" fill="#d6658e"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="272.357" y="293.06">ZK</tspan></text>
+    <rect x="338" y="258" width="77" height="55" fill="#d6658e"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="364.357" y="293.06">ZK</tspan></text>
+    <rect x="430" y="258" width="77" height="55" fill="#d6658e"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="456.357" y="293.06">ZK</tspan></text>
+    <rect x="56" y="258" width="77" height="55" fill="#d6658e"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="82.3569" y="293.06">ZK</tspan></text>
+    <path d="M219.707 123.707C220.098 123.317 220.098 122.683 219.707 122.293L213.343 115.929C212.953 115.538 212.319 115.538 211.929 115.929C211.538 116.319 211.538 116.953 211.929 117.343L217.586 123L211.929 128.657C211.538 129.047 211.538 129.681 211.929 130.071C212.319 130.462 212.953 130.462 213.343 130.071L219.707 123.707ZM126 124H219V122H126V124Z" fill="black"/>
+    <path d="M438.707 123.707C439.098 123.317 439.098 122.683 438.707 122.293L432.343 115.929C431.953 115.538 431.319 115.538 430.929 115.929C430.538 116.319 430.538 116.953 430.929 117.343L436.586 123L430.929 128.657C430.538 129.047 430.538 129.681 430.929 130.071C431.319 130.462 431.953 130.462 432.343 130.071L438.707 123.707ZM345 124H438V122H345V124Z" fill="black"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="141.79" y="146.06">TCP/IP</tspan></text>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="361.79" y="147.06">TCP/IP</tspan></text>
+    <path d="M94.5446 258.89C95.0364 259.142 95.6388 258.947 95.8903 258.455L99.9885 250.443C100.24 249.951 100.045 249.348 99.5535 249.097C99.0618 248.845 98.4593 249.04 98.2078 249.532L94.565 256.654L87.4425 253.012C86.9508 252.76 86.3484 252.955 86.0969 253.446C85.8454 253.938 86.0401 254.541 86.5318 254.792L94.5446 258.89ZM62.0485 159.308L94.0485 258.308L95.9515 257.692L63.9515 158.692L62.0485 159.308Z" fill="black"/>
+    <path d="M468.114 261.463C468.369 261.953 468.974 262.142 469.463 261.886L477.44 257.719C477.93 257.463 478.119 256.859 477.863 256.37C477.608 255.88 477.004 255.691 476.514 255.946L469.423 259.651L465.719 252.56C465.463 252.07 464.859 251.881 464.37 252.137C463.88 252.392 463.691 252.996 463.946 253.486L468.114 261.463ZM500.046 158.701L468.046 260.701L469.954 261.299L501.954 159.299L500.046 158.701Z" fill="black"/>
+  </svg>
+</div>
+
+This deployment includes:
+
+- The producer and consumer processes
+- A 3 node Kafka cluster
+- A 5 node Zookeeper cluster to support the Kafka cluster
+
+As of Kafka version 2.8.0, Kafka includes a preview of the self-managed quorum. For production use Zookeeper is still recommended. As a result, you must deploy both the Zookeeper and Kafka clusters.
+
+### Aeron Architecture
+
+<div align="center">
+  <svg width="50%" height="auto" viewBox="0 0 446 73" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="126" height="73" fill="#707aed"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="23.9736" y="44.06">Producer</tspan></text>
+    <rect x="320" width="126" height="73" fill="#707aed"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="337.944" y="44.06">Consumer</tspan></text>
+    <path d="M320.707 37.7071C321.098 37.3166 321.098 36.6834 320.707 36.2929L314.343 29.9289C313.953 29.5384 313.319 29.5384 312.929 29.9289C312.538 30.3195 312.538 30.9526 312.929 31.3431L318.586 37L312.929 42.6569C312.538 43.0474 312.538 43.6805 312.929 44.0711C313.319 44.4616 313.953 44.4616 314.343 44.0711L320.707 37.7071ZM125 38H126.97V36H125V38ZM131.894 38H135.833V36H131.894V38ZM140.758 38H144.697V36H140.758V38ZM149.621 38H153.561V36H149.621V38ZM158.485 38H162.424V36H158.485V38ZM167.348 38H171.288V36H167.348V38ZM176.212 38H180.152V36H176.212V38ZM185.076 38H189.015V36H185.076V38ZM193.939 38H197.879V36H193.939V38ZM202.803 38H206.742V36H202.803V38ZM211.667 38H215.606V36H211.667V38ZM220.53 38H224.47V36H220.53V38ZM229.394 38H233.333V36H229.394V38ZM238.258 38H242.197V36H238.258V38ZM247.121 38H251.061V36H247.121V38ZM255.985 38H259.924V36H255.985V38ZM264.848 38H268.788V36H264.848V38ZM273.712 38H277.651V36H273.712V38ZM282.576 38H286.515V36H282.576V38ZM291.439 38H295.379V36H291.439V38ZM300.303 38H304.242V36H300.303V38ZM309.167 38H313.106V36H309.167V38ZM318.03 38H320V36H318.03V38ZM321.414 38.4142C322.195 37.6332 322.195 36.3668 321.414 35.5858L308.686 22.8579C307.905 22.0768 306.639 22.0768 305.858 22.8579C305.077 23.6389 305.077 24.9052 305.858 25.6863L317.172 37L305.858 48.3137C305.077 49.0948 305.077 50.3611 305.858 51.1421C306.639 51.9232 307.905 51.9232 308.686 51.1421L321.414 38.4142ZM125 39H126.97V35H125V39ZM131.894 39H135.833V35H131.894V39ZM140.758 39H144.697V35H140.758V39ZM149.621 39H153.561V35H149.621V39ZM158.485 39H162.424V35H158.485V39ZM167.348 39H171.288V35H167.348V39ZM176.212 39H180.152V35H176.212V39ZM185.076 39H189.015V35H185.076V39ZM193.939 39H197.879V35H193.939V39ZM202.803 39H206.742V35H202.803V39ZM211.667 39H215.606V35H211.667V39ZM220.53 39H224.47V35H220.53V39ZM229.394 39H233.333V35H229.394V39ZM238.258 39H242.197V35H238.258V39ZM247.121 39H251.061V35H247.121V39ZM255.985 39H259.924V35H255.985V39ZM264.848 39H268.788V35H264.848V39ZM273.712 39H277.651V35H273.712V39ZM282.576 39H286.515V35H282.576V39ZM291.439 39H295.379V35H291.439V39ZM300.303 39H304.242V35H300.303V39ZM309.167 39H313.106V35H309.167V39ZM318.03 39H320V35H318.03V39Z" fill="black"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="193.413" y="64.06">UDP</tspan></text>
+  </svg>
+</div>
+
+This deployment includes:
+
+- The producer and consumer processes
+
+This comparison is a bit unfair though. Kafka could do more, and can offer a higher degree of reliability - for example, the producer process and consumer process are able to run at different times, with minimal impact on each individual processes flow. Aeron can also achieve this, via the usage of Aeron Archive.
+
+If we wanted the Producer to be able to write without the Consumer, or to allow the Consumer to read historical data (e.g. last 7 days or similar), we could swap them over to Aeron Archive:
+
+<div align="center">
+  <svg width="50%" height="auto" viewBox="0 0 446 151" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="126" height="73" fill="#707aed"/>
+    <rect y="112" width="126" height="34" fill="#707aed"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="23.9736" y="44.06">Producer</tspan></text>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="29.8286" y="136.06">Storage</tspan></text>
+    <rect x="320" width="126" height="73" fill="#707aed"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="337.944" y="44.06">Consumer</tspan></text>
+    <path d="M124.293 36.2929C123.902 36.6834 123.902 37.3166 124.293 37.7071L130.657 44.0711C131.047 44.4616 131.681 44.4616 132.071 44.0711C132.462 43.6805 132.462 43.0474 132.071 42.6569L126.414 37L132.071 31.3431C132.462 30.9526 132.462 30.3195 132.071 29.9289C131.681 29.5384 131.047 29.5384 130.657 29.9289L124.293 36.2929ZM320.707 37.7071C321.098 37.3166 321.098 36.6834 320.707 36.2929L314.343 29.9289C313.953 29.5384 313.319 29.5384 312.929 29.9289C312.538 30.3195 312.538 30.9526 312.929 31.3431L318.586 37L312.929 42.6569C312.538 43.0474 312.538 43.6805 312.929 44.0711C313.319 44.4616 313.953 44.4616 314.343 44.0711L320.707 37.7071ZM125 38H126.97V36H125V38ZM131.894 38H135.833V36H131.894V38ZM140.758 38H144.697V36H140.758V38ZM149.621 38H153.561V36H149.621V38ZM158.485 38H162.424V36H158.485V38ZM167.348 38H171.288V36H167.348V38ZM176.212 38H180.152V36H176.212V38ZM185.076 38H189.015V36H185.076V38ZM193.939 38H197.879V36H193.939V38ZM202.803 38H206.742V36H202.803V38ZM211.667 38H215.606V36H211.667V38ZM220.53 38H224.47V36H220.53V38ZM229.394 38H233.333V36H229.394V38ZM238.258 38H242.197V36H238.258V38ZM247.121 38H251.061V36H247.121V38ZM255.985 38H259.924V36H255.985V38ZM264.848 38H268.788V36H264.848V38ZM273.712 38H277.651V36H273.712V38ZM282.576 38H286.515V36H282.576V38ZM291.439 38H295.379V36H291.439V38ZM300.303 38H304.242V36H300.303V38ZM309.167 38H313.106V36H309.167V38ZM318.03 38H320V36H318.03V38ZM123.586 35.5858C122.805 36.3668 122.805 37.6332 123.586 38.4142L136.314 51.1421C137.095 51.9232 138.361 51.9232 139.142 51.1421C139.923 50.3611 139.923 49.0948 139.142 48.3137L127.828 37L139.142 25.6863C139.923 24.9052 139.923 23.6389 139.142 22.8579C138.361 22.0768 137.095 22.0768 136.314 22.8579L123.586 35.5858ZM321.414 38.4142C322.195 37.6332 322.195 36.3668 321.414 35.5858L308.686 22.8579C307.905 22.0768 306.639 22.0768 305.858 22.8579C305.077 23.6389 305.077 24.9052 305.858 25.6863L317.172 37L305.858 48.3137C305.077 49.0948 305.077 50.3611 305.858 51.1421C306.639 51.9232 307.905 51.9232 308.686 51.1421L321.414 38.4142ZM125 39H126.97V35H125V39ZM131.894 39H135.833V35H131.894V39ZM140.758 39H144.697V35H140.758V39ZM149.621 39H153.561V35H149.621V39ZM158.485 39H162.424V35H158.485V39ZM167.348 39H171.288V35H167.348V39ZM176.212 39H180.152V35H176.212V39ZM185.076 39H189.015V35H185.076V39ZM193.939 39H197.879V35H193.939V39ZM202.803 39H206.742V35H202.803V39ZM211.667 39H215.606V35H211.667V39ZM220.53 39H224.47V35H220.53V39ZM229.394 39H233.333V35H229.394V39ZM238.258 39H242.197V35H238.258V39ZM247.121 39H251.061V35H247.121V39ZM255.985 39H259.924V35H255.985V39ZM264.848 39H268.788V35H264.848V39ZM273.712 39H277.651V35H273.712V39ZM282.576 39H286.515V35H282.576V39ZM291.439 39H295.379V35H291.439V39ZM300.303 39H304.242V35H300.303V39ZM309.167 39H313.106V35H309.167V39ZM318.03 39H320V35H318.03V39Z" fill="black"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="199.413" y="66.06">UDP</tspan></text>
+    <line x1="61" y1="73" x2="61" y2="112" stroke="black" stroke-width="2"/>
+  </svg>
+</div>
+
+Again, the deployment is limited to the Producer and Consumer. The performance for an archive replay is limited by the disk performance. Once historical data has been replayed, the live data stream performance is close to theoretical network speed limits.
+
+Aeron Archive will not however deal with server failure. You could easily replicate the data to a backup server. Alternatively, you could swap to Aeron Cluster. Normally, you would deploy business logic inside Aeron Cluster, however, there are cases where it would be valid to just use it as a sequencer, in which case Aeron Cluster provides resilient Global Total Ordering with many producers and consumers. Aeron Cluster includes the equivalent functionality of Zookeeper, so no additional cluster is needed.
+
+<div align="center">
+  <svg width="60%" height="auto" viewBox="0 0 612 253" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <line x1="310" y1="54" x2="310" y2="210" stroke="black" stroke-width="2" stroke-dasharray="4 5"/>
+    <rect y="90" width="126" height="73" fill="#707aed"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="23.9736" y="134.06">Producer</tspan></text>
+    <rect x="243" y="90" width="126" height="73" fill="#e89e00"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="271.582" y="134.06">Cluster</tspan></text>
+    <rect x="243" width="126" height="73" fill="#e89e00"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="271.582" y="44.06">Cluster</tspan></text>
+    <rect x="243" y="180" width="126" height="73" fill="#e89e00"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="271.582" y="224.06">Cluster</tspan></text>
+    <rect x="486" y="90" width="126" height="73" fill="#707aed"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="503.944" y="129.06">Consumer</tspan></text>
+    <path d="M124.293 126.293C123.902 126.683 123.902 127.317 124.293 127.707L130.657 134.071C131.047 134.462 131.681 134.462 132.071 134.071C132.462 133.681 132.462 133.047 132.071 132.657L126.414 127L132.071 121.343C132.462 120.953 132.462 120.319 132.071 119.929C131.681 119.538 131.047 119.538 130.657 119.929L124.293 126.293ZM241.707 127.707C242.098 127.317 242.098 126.683 241.707 126.293L235.343 119.929C234.953 119.538 234.319 119.538 233.929 119.929C233.538 120.319 233.538 120.953 233.929 121.343L239.586 127L233.929 132.657C233.538 133.047 233.538 133.681 233.929 134.071C234.319 134.462 234.953 134.462 235.343 134.071L241.707 127.707ZM125 128H126.983V126H125V128ZM131.94 128H135.906V126H131.94V128ZM140.863 128H144.829V126H140.863V128ZM149.786 128H153.752V126H149.786V128ZM158.709 128H162.675V126H158.709V128ZM167.632 128H171.598V126H167.632V128ZM176.556 128H180.521V126H176.556V128ZM185.479 128H189.444V126H185.479V128ZM194.402 128H198.368V126H194.402V128ZM203.325 128H207.291V126H203.325V128ZM212.248 128H216.214V126H212.248V128ZM221.171 128H225.137V126H221.171V128ZM230.094 128H234.06V126H230.094V128ZM239.017 128H241V126H239.017V128ZM123.586 125.586C122.805 126.367 122.805 127.633 123.586 128.414L136.314 141.142C137.095 141.923 138.361 141.923 139.142 141.142C139.923 140.361 139.923 139.095 139.142 138.314L127.828 127L139.142 115.686C139.923 114.905 139.923 113.639 139.142 112.858C138.361 112.077 137.095 112.077 136.314 112.858L123.586 125.586ZM242.414 128.414C243.195 127.633 243.195 126.367 242.414 125.586L229.686 112.858C228.905 112.077 227.639 112.077 226.858 112.858C226.077 113.639 226.077 114.905 226.858 115.686L238.172 127L226.858 138.314C226.077 139.095 226.077 140.361 226.858 141.142C227.639 141.923 228.905 141.923 229.686 141.142L242.414 128.414ZM125 129H126.983V125H125V129ZM131.94 129H135.906V125H131.94V129ZM140.863 129H144.829V125H140.863V129ZM149.786 129H153.752V125H149.786V129ZM158.709 129H162.675V125H158.709V129ZM167.632 129H171.598V125H167.632V129ZM176.556 129H180.521V125H176.556V129ZM185.479 129H189.444V125H185.479V129ZM194.402 129H198.368V125H194.402V129ZM203.325 129H207.291V125H203.325V129ZM212.248 129H216.214V125H212.248V129ZM221.171 129H225.137V125H221.171V129ZM230.094 129H234.06V125H230.094V129ZM239.017 129H241V125H239.017V129Z" fill="black"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="162.413" y="154.06">UDP</tspan></text>
+    <path d="M368.293 127.293C367.902 127.683 367.902 128.317 368.293 128.707L374.657 135.071C375.047 135.462 375.681 135.462 376.071 135.071C376.462 134.681 376.462 134.047 376.071 133.657L370.414 128L376.071 122.343C376.462 121.953 376.462 121.319 376.071 120.929C375.681 120.538 375.047 120.538 374.657 120.929L368.293 127.293ZM485.707 128.707C486.098 128.317 486.098 127.683 485.707 127.293L479.343 120.929C478.953 120.538 478.319 120.538 477.929 120.929C477.538 121.319 477.538 121.953 477.929 122.343L483.586 128L477.929 133.657C477.538 134.047 477.538 134.681 477.929 135.071C478.319 135.462 478.953 135.462 479.343 135.071L485.707 128.707ZM369 129H370.983V127H369V129ZM375.94 129H379.906V127H375.94V129ZM384.863 129H388.829V127H384.863V129ZM393.786 129H397.752V127H393.786V129ZM402.709 129H406.675V127H402.709V129ZM411.632 129H415.598V127H411.632V129ZM420.556 129H424.521V127H420.556V129ZM429.479 129H433.444V127H429.479V129ZM438.402 129H442.368V127H438.402V129ZM447.325 129H451.291V127H447.325V129ZM456.248 129H460.214V127H456.248V129ZM465.171 129H469.137V127H465.171V129ZM474.094 129H478.06V127H474.094V129ZM483.017 129H485V127H483.017V129ZM367.586 126.586C366.805 127.367 366.805 128.633 367.586 129.414L380.314 142.142C381.095 142.923 382.361 142.923 383.142 142.142C383.923 141.361 383.923 140.095 383.142 139.314L371.828 128L383.142 116.686C383.923 115.905 383.923 114.639 383.142 113.858C382.361 113.077 381.095 113.077 380.314 113.858L367.586 126.586ZM486.414 129.414C487.195 128.633 487.195 127.367 486.414 126.586L473.686 113.858C472.905 113.077 471.639 113.077 470.858 113.858C470.077 114.639 470.077 115.905 470.858 116.686L482.172 128L470.858 139.314C470.077 140.095 470.077 141.361 470.858 142.142C471.639 142.923 472.905 142.923 473.686 142.142L486.414 129.414ZM369 130H370.983V126H369V130ZM375.94 130H379.906V126H375.94V130ZM384.863 130H388.829V126H384.863V130ZM393.786 130H397.752V126H393.786V130ZM402.709 130H406.675V126H402.709V130ZM411.632 130H415.598V126H411.632V130ZM420.556 130H424.521V126H420.556V130ZM429.479 130H433.444V126H429.479V130ZM438.402 130H442.368V126H438.402V130ZM447.325 130H451.291V126H447.325V130ZM456.248 130H460.214V126H456.248V130ZM465.171 130H469.137V126H465.171V130ZM474.094 130H478.06V126H474.094V130ZM483.017 130H485V126H483.017V130Z" fill="black"/>
+    <text fill="black" xml:space="preserve"  font-family="w-sans" font-size="21" letter-spacing="0px"><tspan x="406.413" y="155.06">UDP</tspan></text>
+  </svg>
+</div>
+
+Performance for Aeron Cluster remains excellent, with latencies under heavy load on appropriate hardware well under 100 microseconds at the 99th percentile.
+
+## Producers
+
+This section looks at the similarities and differences between Kafka and Aeron when used via a Producer process.
+
+### Producers in Kafka
+
+Kafka supports both synchronous and asynchronous scenarios with the producer APIs. Additionally, via configuration of the API, the Kafka client can offer different levels of guarantees:
+
+- If `acks` is set to `0`, there are no guarantees. The producer writes to the buffer, and considers the message sent. This is the weakest guarantee Kafka offers. This mode offers the lowest latency offered by Kafka.
+- If `acks` is set to `1`, you're guaranteed that the broker partition leader has received the message - but not yet that all nodes of the partition cluster have committed the data. This mode significantly increases latency.
+- If `acks` is set to `-1` or `All`, you're guaranteed that the broker partition leader has received the message and all in-sync replicas have accepted the message. You would typically apply this along with `min.insync.replicas` set to a value > 1. This is the strongest guarantee Kafka offers. This mode increases latency over the `acks=1`.
+
+Sending a message synchronously is a matter of producing a `record`, calling `send` and awaiting the future:
+
+```java
+final ProducerRecord<K, V> = new ProducerRecord<>(topic, key, value);
+final Future<RecordMetadata> future = producer.send(record);
+RecordMetadata metadata = future.get();
+```
+
+Asynchronous sends are similar, although the send operation will return the moment the data is written to the buffer of records pending send.
+Note that the callback is executed on the producer's I/O thread, so care must be taken to not perform long-running tasks in it.
+
+```java file=file.java copy
+final ProducerRecord<K, V> = new ProducerRecord<>(topic, key, value);
+producer.send(record, new Callback() {
+  public void onCompletion(RecordMetadata metadata, Exception e) {
+    if (e != null)
+      log.debug("error sending {}", record, e);
+  }
+});
+```
+
+In both scenarios, Kafka allows the sender to:
+
+- Specify a topic and optionally a key, which is used to guide the producer client to select the appropriate cluster partition.
+- The value, which is typically an Avro byte buffer
+
+The Kafka producer API provides back-pressure support via buffer and max block waiting time configuration.
+At construction time of the Kafka producer, you can override the `buffer.memory` size beyond the default, and set a `max.block.ms` value to specify how long the client must block for if the broker is unable to accept messages from your connection.
+If the producer is sending records faster than Kafka's broker can consume, the Kafka broker will apply back-pressure by delaying the sending of ack messages.
+Once the blocking timeout is exceeded, an exception is thrown. The producer is required to take the necessary corrective action.
+
+The Kafka producer API is thread safe.
+
+### Publishers in Aeron
+
+Aeron has no broker (unless you're executing the Media Driver as an external process on the local server, in which case it's acting as a distributed broker)[^md], and the guarantees it offers are different.
+
+To send data to a destination in Aeron, you must first create a `Publication`[^publication]. By defining the publication, you're telling Aeron where to send data (host & port), and to which stream to send to:
+
+```java
+//assumes there is already a Media Driver and Aeron client setup
+//send to remote host 10.10.123.241 on port 12345
+final String channel = "aeron:udp?endpoint=10.10.123.241:12345";
+//send on stream 10. Multiple streams can be supported on the same endpoint
+final int streamId = 10;
+final Publication pub = aeron.addPublication(channel, streamId))
+```
+
+Sending in Aeron is performed using a `Publication`, and only accepts a DirectBuffer as the message content:
+
+```java
+final DirectBuffer content = ...
+final long result = pub.offer(content);
+```
+
+All sending in Aeron is synchronous to the local log buffer[^logbuffer].
+This log buffer is a memory mapped file typically stored on `\dev\shm` containing all inflight messages, plus a window of historical messages to support data loss recovery by the consumer.
+Aeron does not offer a way to await an acknowledgement of the message from the remote host (the equivalent of either `acks` = `1` or `-1` or `all`), but the guarantees are stronger than that offered by Kafka's `acks=0` since temporal network failures are recoverable.
+If Aeron Cluster is used, and deployed as a sequencer, you can get the approximate equivalent guarantees of `acks` = `-1` or `all`.
+
+If both sides are running correctly, and the consumer is actively consuming messages, then Aeron ensures that the messages are delivered in order sent to the remote host despite UDP message loss and out of order message delivery.
+
+The result returned[^publication] from the publication's `offer` call is used to understand the current state of the connection and delivery.
+
+- a value of -1 indicates that there is no subscription connected. Subscriptions can come and go naturally, so this does not indicate an error. If there is nothing to receive the message, why send it?
+- a value of -2 indicates that the offer was back-pressured. The producer is required to wait for the consumer, or to take corrective action.
+- a value of -3 indicates that an admin action was underway as the log buffer terms were being rotated at that moment. The application should attempt the offer again.
+- a value of -4 indicates that the publication is now closed and is unable to accept data. This is typically because something else in the application closed the publication.
+- a value of -5 indicates that offer failed due to the log buffer reaching the maximum position of the stream given term buffer length multiplied by three. When this happens, it is suggested the term buffer size be increased and/or the message size decreased.
+
+Aeron offers users both a thread safe (`ConcurrentPublication`) and non-thread safe (`ExclusivePublication`) API. The `ExclusivePublication` offers slightly improved latency since all locking code is removed.
+
+## Consumers
+
+The mechanisms for building Consumers is logically similar across Kafka and Aeron and Aeron Archive. Aeron Cluster is however fairly different.
+
+### Consumers in Kafka
+
+```java
+//define the connection
+Properties props = new Properties();
+props.setProperty("bootstrap.servers", "localhost:9092");
+props.setProperty("group.id", "test");
+props.setProperty("enable.auto.commit", "true");
+props.setProperty("auto.commit.interval.ms", "1000");
+props.setProperty("key.deserializer",
+     "org.apache.kafka.common.serialization.StringDeserializer");
+props.setProperty("value.deserializer",
+     "org.apache.kafka.common.serialization.StringDeserializer");
+
+//connect
+KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+
+//subscribe to topics 'topic-a' and 'topic-b'
+consumer.subscribe(Arrays.asList("topic-a", "topic-b"));
+
+//poll the client for new data, waiting (and thus blocking) for a
+// maximum of 100ms between each poll.
+while (true)
+{
+   ConsumerRecords<String, String> records =
+        consumer.poll(Duration.ofMillis(100));
+   for (ConsumerRecord<String, String> record : records)
+   {
+       System.out.printf("offset = %d, key = %s, value = %s%n",
+              record.offset(), record.key(), record.value());
+   }
+}
+```
+
+The core is the `consumer.poll` function - this is fetching new records for the subscribed topics.
+It will try to consume from the same offset, so that data is supplied sequentially.
+
+### Subscribers in Aeron and Aeron Archive
+
+```java
+//listen on localhost port 12345
+final String channel = "aeron:udp?endpoint=localhost:12345";
+//listen on stream 10
+final int streamId = 10;
+//setup the subscription; assumes Aeron and Media driver available
+final Subscription subscription = aeron.addSubscription(channel, stream);
+
+//dutyCycle would typically be in an Agrona Agent and be managed
+//by an IdleStrategy; this is a rough idea of what's happening:
+public void dutyCycle()
+{
+    while (true)
+    {
+        //if the process is still processing data on the subscription
+        //then don't idle, keep in a tight loop until done
+        if (doWork() <= 0)
+        {
+            Thread.onSpinWait(); //or similar
+        }
+    }
+}
+
+public int doWork()
+{
+    //poll up to 10 items at a time
+    return subscription.poll(this::handler, 10);
+}
+
+private void handler(DirectBuffer buffer, int offset, int length,
+                     Header header)
+{
+    //consume the message
+}
+```
+
+As you can see, the polling concept is common to both Kafka and Aeron & Aeron Archive.
+Aeron does not block the poll however - the code can optionally idle, if that's a requirement for performance and resource management reasons. Agrona agents that host one or more `Subscription` objects can be scheduled on dedicated, or shared threads as needed.
+Another subtle difference is Aeron will poll a maximum number of items, while Kafka will poll for a maximum amount of time.
+
+Both can offer more advanced capabilities:
+
+- Read from a given offset (limited in Aeron's case to Aeron Archive clients). Note that offsets in Kafka refer to the message number, while in Aeron offsets refer to a position within a stream
+- Commit/rollback a read (requires use of the `ControlledPoll` in Aeron)
+- Kafka allows the creation of Consumer Groups, which allow efficient scale out of processing
+- Multiple producers can send to a single Aeron Subscription; each subscription can be individually identified via it's session (provided via the `Header` parameter)
+
+### Aeron Cluster
+
+Aeron Cluster operates a [Replicated State Machine](https://aeroncookbook.com/distributed-systems-basics/replicated-state-machines/?utm_source=shaunlaurens.com&utm_medium=web&utm_campaign=kafkavaeron), which requires that messages are delivered sequentially. As a result, you have no ability to poll and cannot request more than 1 message at a time. Under the covers, Aeron is batching the messages, on your behalf, so there is little need to worry about throughput in this scenario.
+
+Consuming a message in Aeron Cluster is a matter of wiring up the Cluster client, and processing the `onSessionMessage` events.
+
+```java
+@Override
+public void onSessionMessage(ClientSession session, long timestamp,
+                             DirectBuffer buffer, int offset,
+                             int length, Header header)
+{
+    //consume the message
+}
+```
+
+---
+
+## Change Log
+
+- Updated 29 November 2020 to include additional clarity around getting low latency with Aeron Archive, and fixed footnotes within the comparison table.
+- Updated 11 February 2021 with clarification around offset differences between Aeron and Kafka
+- Updated 21 June 2021 with note around Kafka self hosted quorum in Kafka 2.8.0
+
+[^md]: <span className="footnote-ref mr-2">md</span>The Media Driver and its role with Aeron is described at <a href="https://aeroncookbook.com/aeron/media-driver/?utm_source=shaunlaurens.com&utm_medium=web&utm_campaign=kafkavaeron">Aeron Cookbook - Media Driver</a>
+
+[^publication]: <span className="footnote-ref mr-2">publication</span>Publications are described in depth at <a href="https://aeroncookbook.com/aeron/publications-subscriptions/?utm_source=shaunlaurens.com&utm_medium=web&utm_campaign=kafkavaeron">Aeron Cookbook - Publications</a>
+
+[^stream]: <span className="footnote-ref mr-2">stream</span>See Impact on ordering in <a href="https://aeroncookbook.com/aeron/aeron-channel-stream-session/?utm_source=shaunlaurens.com&utm_medium=web&utm_campaign=kafkavaeron&h=+guarantee#impact-on-ordering">Aeron Cookbook - Channels, Streams and Sessions</a>
+
+[^logbuffer]: <span className="footnote-ref mr-2">logbuffer</span>Log Buffers, and how they are used by Aeron is described at <a href="https://aeroncookbook.com/aeron/log-buffers-images/?utm_source=shaunlaurens.com&utm_medium=web&utm_campaign=kafkavaeron">Aeron Cookbook - Log Buffers</a>
+
+[^msgorder]: <span className="footnote-ref mr-2">msgorder</span>This requires that <span className="footnote-code">max.in.flight.requests.per.connection</span> is changed from default value to <span className="footnote-code">1</span>
+
+[^aeronmsgsize]: <span className="footnote-ref mr-2">aeronmsgsize</span>Controlled via configuration for each channel, or globally. See <a href="https://aeroncookbook.com/cookbook-content/aeron-term-length-msg-size/?utm_source=shaunlaurens.com&utm_medium=web&utm_campaign=kafkavaeron">Aeron Cookbook</a>
+
+[^kafkamsgsize]: <span className="footnote-ref mr-2">kafkamsgsize</span>Can be changed via overriding configuration settings on the Topic, Broker, Consumer and Producer. See <span className="footnote-code">message.max.bytes</span>, <span className="footnote-code">replica.fetch.max.bytes</span>, <span className="footnote-code">max.request.size</span>, <span className="footnote-code">fetch.message.max.bytes</span>. You will also likely need to tune compression, linger and buffer memory settings. Additionally, you may also have to alter JVM settings.
+
+[^naturalbatch]: <span className="footnote-ref mr-2">naturalbatch</span>Aeron will automatically batch data sent by producers based upon current throughput and process activity. For consumers the batch maximum size can be controlled via the <span className="footnote-code">poll</span> call, but actual message batch size depends on message availability. Under the covers, the Aeron <span className="footnote-code">Subscription</span> is performing Natural Batching as well.
+
+[^kafkabatch]: <span className="footnote-ref mr-2">kafkabatch</span>See <span className="footnote-code">linger.ms</span> for time based batching configuration, and <span className="footnote-code">batch.size</span> settings in the Producer, and <span className="footnote-code">max.poll.records</span> for the Consumer.
+
+[^zgc]: <span className="footnote-ref mr-2">zgc</span>To run with zero GC, you would be restricted to sending messages smaller than the <span className="footnote-code">maxPayloadLength</span>, which is derived from the UDP MTU. See <a href="https://aeroncookbook.com/aeron/publications-subscriptions/?utm_source=shaunlaurens.com&utm_medium=web&utm_campaign=kafkavaeron&h=+tryclaim#tryclaim">Aeron Cookbook - Publications - Try Claim</a>
+
+[^aeronmax]: <span className="footnote-ref mr-2">aeronmax</span>To achieve maximum performance with Aeron, you would need to use Solarflare cards, the premium ef_vi transport bindings, high performance network switches and dedicated hardware. You would also need to tune the Linux operating system, carefully select the NUMA layout, and pin core Aeron threads to specific CPU cores. Aeron operates without issue on the cloud, but latency drops off to tens of microseconds or worse, depending on the server and network configuration, host and network utilization and rack distances etc.
+
+[^ipcmax]: <span className="footnote-ref mr-2">ipcmax</span>To achieve performance of under 1 microsecond on Aeron IPC, you will need to make use of a very high performance codec such as <a href="https://github.com/real-logic/simple-binary-encoding">Simple Binary Encoding</a>, keep messages small (roughly 32 bytes or fewer), use <span className="footnote-code">tryClaim</span>, and tune the duty cycles of Aeron and the Agrona Agents carefully. See <a href="https://aeroncookbook.com/agrona/agents-idle-strategies/?utm_source=shaunlaurens.com&utm_medium=web&utm_campaign=kafkavaeron">Aeron Cookbook on Agents & Idle Strategies</a> for details on Agents & Idle Strategies, and <a href="https://aeroncookbook.com/aeron-cookbook/ipc/?utm_source=shaunlaurens.com&utm_medium=web&utm_campaign=kafkavaeron#performance">Aeron Cookbook - Aeron IPC</a> for an example that sends 4 byte messages via IPC at a rate of ±625ns/message.
+
+[^archiveresilience]: <span className="footnote-ref mr-2">archiveresilience</span>To get reliable Aeron Archive on the consumer side, without any double processing, you'd need to store consumed offset and replay from that offset. To achieve reliability on the producer side, you would need to replicate the archive in realtime to back up server(s), or store the data on a remote high-speed storage array. Aeron has built in support for real-time replication, see <a href="https://aeroncookbook.com/aeron-archive/replication-sample/?utm_source=shaunlaurens.com&utm_medium=web&utm_campaign=kafkavaeron">Aeron Cookbook Replication Sample</a>
+
+[^archivemax]: <span className="footnote-ref mr-2">archivemax</span>For Aeron Archive to get this latency, it would need to be streaming live. Replay from disk will be slower, and will depend on the hardware used.
+
+[^clustermax]: <span className="footnote-ref mr-2">clustermax</span>For Aeron Cluster to achive low latency, you would need to be running in a 3 node cluster, only commit the log to page memory (i.e. not force disk writes), and use hardware in line with <span className="footnote-ref">aeronmax</span> above.
