@@ -88,9 +88,9 @@ const Layout = () => {
                       <div className="relative">
                         <div className="inline-flex shadow-sm rounded-md divide-x divide-blue-600">
                           <div className="relative z-0 inline-flex shadow-sm rounded-md divide-x divide-blue-600">
-                            <div className="relative inline-flex items-center bg-blue-500 py-2 pl-3 pr-4 border border-transparent rounded-l-md shadow-sm text-white">
-                              <EyeIcon className="h-5 w-5" aria-hidden="true" />
-                              <p className="ml-2.5 text-sm font-medium">{selected.title}</p>
+                            <div className="relative inline-flex items-center bg-gray-100 py-2 pl-3 pr-4 border border-transparent rounded-l-md shadow-sm text-white">
+                              <EyeIcon className="h-5 w-5 text-black" aria-hidden="true" />
+                              <p className="ml-2.5 text-sm text-black font-medium">{selected.title}</p>
                             </div>
                             <Listbox.Button className="relative inline-flex items-center bg-blue-500 p-2 rounded-l-none rounded-r-md text-sm font-medium text-white hover:bg-blue-600 focus:outline-none focus:z-10 focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-blue-500">
                               <span className="sr-only">Change published status</span>
@@ -145,7 +145,7 @@ const Layout = () => {
                   )}
                 </Listbox>
                 </span>
-                <button className="text-sm font-medium text-gray-900" onClick={() => setShowModal(true)}>
+                <button className="ml-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-500 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onClick={() => setShowModal(true)}>
                   About
                 </button>
                 {showModal ? (
@@ -168,7 +168,7 @@ const Layout = () => {
                           </div>
                           <div className="flex items-center justify-end p-6 border-t border-solid border-blue-200 rounded-b">
                             <button
-                              className="text-white bg-blue-500 font-bold rounded-md uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                              className="text-white bg-blue-500 font-bold rounded-md uppercase px-6 py-2 text-sm outline-none focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-1 mb-1 ease-linear transition-all duration-150"
                               type="button"
                               onClick={() => setShowModal(false)}
                             >
@@ -234,12 +234,12 @@ const Layout = () => {
                   <div className="h-16">
                     <div className="ml-8 mr-2 mt-4 mb-4">
                       <button type="button"
-                              className="mb-4 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-500 hover:bg-blue-600 focus:outline-none"
+                              className="mb-4 inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-500 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                               onClick={e => handleClick()}>
                         Process in Browser
                       </button>
                       <button onClick={() => setShowHelp(true)}
-                              className="ml-8 mb-4 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none">
+                              className="ml-8 mb-4 inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                         Help
                       </button>
                       {showHelp ? (
@@ -276,7 +276,7 @@ const Layout = () => {
                                 </div>
                                 <div className="flex items-center justify-end p-6 border-t border-solid border-blue-200 rounded-b">
                                   <button
-                                    className="text-white bg-blue-500 font-bold rounded-md uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                                    className="text-white bg-blue-500 font-bold rounded-md uppercase px-6 py-2 text-sm outline-none focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-1 mb-1 ease-linear transition-all duration-150"
                                     type="button"
                                     onClick={() => setShowHelp(false)}
                                   >
