@@ -16,8 +16,10 @@
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import Meta from '../components/Meta';
-import React, { useState } from 'react';
-import { Switch } from '@headlessui/react'
+import React, { Fragment, useState } from 'react';
+import { ChevronDownIcon } from '@heroicons/react/solid'
+import { EyeIcon } from '@heroicons/react/outline'
+import { Switch, Listbox, Transition } from '@headlessui/react'
 import { IoIosSpeedometer } from 'react-icons/io';
 import { FaTools } from 'react-icons/fa';
 import { AeronStatOutput } from '../lib/aeronStatTypes';
@@ -33,12 +35,19 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }
 
+const publishingOptions = [
+  { title: 'Data Entry', description: 'Show the data entry and complete view.', current: true },
+  { title: 'Complete', description: 'Hide the data entry and show complete view.', current: false },
+]
+
+
 const Layout = () => {
   const [formState, setFormState] = React.useState('Paste AeronStat output here');
   const [data, setData] = React.useState<AeronStatOutput>();
   const [enabled, setEnabled] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [selected, setSelected] = useState(publishingOptions[0])
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setFormState(event.target.value);
@@ -71,23 +80,70 @@ const Layout = () => {
             </div>
             <div className="ml-10 pr-4 flex-shrink-0 flex items-center space-x-10">
               <nav aria-label="Global" className="flex space-x-10">
-              <span>
-                <Switch
-                  checked={enabled}
-                  onChange={setEnabled}
-                  className={classNames(
-                    enabled ? 'bg-blue-600' : 'bg-gray-200',
-                    'relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-                  )}>
-                  <span className="sr-only">Toggle entry</span>
-                  <span
-                    aria-hidden="true"
-                    className={classNames(
-                      enabled ? 'translate-x-5' : 'translate-x-0',
-                      'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200'
-                    )}
-                  />
-                </Switch>
+                <span>
+                <Listbox value={selected} onChange={setSelected}>
+                  {({ open }) => (
+                    <>
+                      <Listbox.Label className="sr-only">Change published status</Listbox.Label>
+                      <div className="relative">
+                        <div className="inline-flex shadow-sm rounded-md divide-x divide-blue-600">
+                          <div className="relative z-0 inline-flex shadow-sm rounded-md divide-x divide-blue-600">
+                            <div className="relative inline-flex items-center bg-blue-500 py-2 pl-3 pr-4 border border-transparent rounded-l-md shadow-sm text-white">
+                              <EyeIcon className="h-5 w-5" aria-hidden="true" />
+                              <p className="ml-2.5 text-sm font-medium">{selected.title}</p>
+                            </div>
+                            <Listbox.Button className="relative inline-flex items-center bg-blue-500 p-2 rounded-l-none rounded-r-md text-sm font-medium text-white hover:bg-blue-600 focus:outline-none focus:z-10 focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-blue-500">
+                              <span className="sr-only">Change published status</span>
+                              <ChevronDownIcon className="h-5 w-5 text-white" aria-hidden="true" />
+                            </Listbox.Button>
+                          </div>
+                        </div>
+
+                        <Transition
+                          show={open}
+                          as={Fragment}
+                          leave="transition ease-in duration-100"
+                          leaveFrom="opacity-100"
+                          leaveTo="opacity-0"
+                        >
+                          <Listbox.Options
+                            static
+                            className="origin-top-right absolute z-10 right-0 mt-2 w-72 rounded-md shadow-lg overflow-hidden bg-white divide-y divide-gray-200 ring-1 ring-black ring-opacity-5 focus:outline-none"
+                          >
+                            {publishingOptions.map((option) => (
+                              <Listbox.Option
+                                key={option.title}
+                                className={({ active }) =>
+                                  classNames(
+                                    active ? 'text-white bg-blue-500' : 'text-gray-900',
+                                    'cursor-default select-none relative p-4 text-sm'
+                                  )
+                                }
+                                value={option}
+                              >
+                                {({ selected, active }) => (
+                                  <div className="flex flex-col">
+                                    <div className="flex justify-between">
+                                      <p className={selected ? 'font-semibold' : 'font-normal'}>{option.title}</p>
+                                      {selected ? (
+                                        <span className={active ? 'text-white' : 'text-blue-500'}>
+                                          <EyeIcon className="h-5 w-5" aria-hidden="true" />
+                                        </span>
+                                      ) : null}
+                                    </div>
+                                    <p className={classNames(active ? 'text-blue-200' : 'text-gray-500', 'mt-2')}>
+                                      {option.description}
+                                    </p>
+                                  </div>
+                                )}
+                              </Listbox.Option>
+                            ))}
+                          </Listbox.Options>
+                        </Transition>
+                      </div>
+                    </>
+                  )}
+                </Listbox>
                 </span>
                 <button className="text-sm font-medium text-gray-900" onClick={() => setShowModal(true)}>
                   About
@@ -164,7 +220,7 @@ const Layout = () => {
                 <AeronStatOutputDisplay aeronStatOutput={data} />
               )}
             </section>
-            {enabled && ( 
+            {selected.title === 'Data Entry' && ( 
             <aside className="block flex-shrink-0 order-first">
               <div className="h-screen relative w-96 border-r border-gray-200 bg-gray-100">
                 <div className="h-screen">
