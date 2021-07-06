@@ -28,7 +28,7 @@ const AeronStatPublicationDisplay: React.FC<Props> = ({ publications }: Props) =
        <span>External Publications - {publications.length}</span>
       </div>
       
-      <div className="grid grid-cols-9 px-6">
+      <div className="grid grid-cols-9 px-6 bg-yellow-50">
         <span className="pt-1 pr-2 text-xs text-gray-500 font-bold col-span-2 break-all ">Channel</span>
         <span className="pt-1 pr-2 text-xs text-gray-500 bg-blue-50 font-bold text-right">Session</span>
         <span className="pt-1 pr-2 text-xs text-gray-500 font-bold text-right">Stream ID</span>
@@ -42,13 +42,13 @@ const AeronStatPublicationDisplay: React.FC<Props> = ({ publications }: Props) =
       {publications.map((pub) => (
         <div key={pub.sessionId} className="grid grid-cols-9 px-6">
           <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 col-span-2 break-all font-code">{pub.channel}</span>
-          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 bg-blue-50 font-code text-right">{pub.sessionId}</span>
-          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 font-code text-right">{pub.streamId}</span>
-          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 bg-blue-50 font-code text-right">{pub.sendBackPressureEvents}</span>
-          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 font-code text-right">{pub.pubPositionSampled}</span>
-          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 bg-blue-50 font-code text-right">{pub.pubLimit}</span>
-          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 font-code text-right">{pub.sendPosition}</span>
-          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 bg-blue-50 font-code text-right">{pub.sendLimit}</span>
+          <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 bg-blue-50 font-code text-right">{pub.sessionId}</span>
+          <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 font-code text-right">{pub.streamId}</span>
+          <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 bg-blue-50 font-code text-right">{pub.sendBackPressureEvents}</span>
+          <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 font-code text-right">{pub.pubPositionSampled}</span>
+          <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 bg-blue-50 font-code text-right">{pub.pubLimit}</span>
+          <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 font-code text-right">{pub.sendPosition}</span>
+          <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 bg-blue-50 font-code text-right">{pub.sendLimit}</span>
         </div>
       ))}
 

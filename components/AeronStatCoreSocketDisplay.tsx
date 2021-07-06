@@ -28,19 +28,19 @@ const AeronStatCoreSocketDisplay: React.FC<Props> = ({ receiveSockets, sendSocke
     <div className="py-2 px-6 bg-yellow-100">
        <span>Sockets in use by Aeron</span>
       </div>
-      <div className="py-2 grid grid-cols-2 gap-2 px-6">
+      <div className="grid grid-cols-2 px-6 bg-yellow-50">
         <dt className="text-sm font-medium text-gray-500">Send</dt>
-        <dt className="text-sm font-medium text-gray-500">Receive</dt>
+        <dt className="text-sm pl-2 font-medium text-gray-500">Receive</dt>
       </div>
-      <div className="py-2 grid grid-cols-2 gap-2 px-6 font-code">
+      <div className="grid grid-cols-2 font-code">
         <ul className="text-xs">
         {sendSockets.map((socket) => (
-          <li key={socket.hostAndPort} className="mb-2 pb-2 border-b">{socket.hostAndPort} - {socket.channel}</li>
+          <li key={socket.hostAndPort} className="pb-2 pl-6 pt-2 border-b">{socket.hostAndPort} - {socket.channel}</li>
         ))}
         </ul>
         <ul className="text-xs font-code">
         {receiveSockets.map((socket) => (
-          <li key={socket.hostAndPort} className="mb-2 pb-2 border-b">{socket.hostAndPort} - {socket.channel}</li>
+          <li key={socket.hostAndPort} className="pb-2 pl-2 pt-2 border-b">{socket.hostAndPort} - {socket.channel}</li>
         ))}</ul>
       </div>
     </>

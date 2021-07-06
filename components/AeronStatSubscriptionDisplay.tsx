@@ -28,7 +28,7 @@ const AeronStatSubscriptionDisplay: React.FC<Props> = ({ subscriptions }: Props)
        <span>External Subscriptions - {subscriptions.length}</span>
       </div>
       
-      <div className="grid grid-cols-7 px-6">
+      <div className="grid grid-cols-7 px-6 bg-yellow-50">
         <span className="pt-1 pr-2 text-xs text-gray-500 font-bold col-span-2 break-all">Channel</span>
         <span className="pt-1 pr-2 text-xs text-gray-500 bg-blue-50 font-bold text-right">Session</span>
         <span className="pt-1 pr-2 text-xs text-gray-500 font-bold text-right">Stream ID</span>
@@ -40,11 +40,11 @@ const AeronStatSubscriptionDisplay: React.FC<Props> = ({ subscriptions }: Props)
       {subscriptions.map((subs) => (
         <div key={subs.sessionId} className="grid grid-cols-7 px-6">
           <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 col-span-2 break-all font-code">{subs.channel}</span>
-          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 font-code bg-blue-50 text-right">{subs.sessionId}</span>
-          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 font-code text-right">{subs.streamId}</span>
-          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 font-code bg-blue-50 text-right">{subs.subPosition}</span>
-          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 font-code text-right ">{subs.receivePosition}</span>
-          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 font-code bg-blue-50 text-right ">{subs.receiveHighWatermark}</span>
+          <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 font-code bg-blue-50 text-right">{subs.sessionId}</span>
+          <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 font-code text-right">{subs.streamId}</span>
+          <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 font-code bg-blue-50 text-right">{subs.subPosition}</span>
+          <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 font-code text-right ">{subs.receivePosition}</span>
+          <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 font-code bg-blue-50 text-right ">{subs.receiveHighWatermark}</span>
         </div>
       ))}
 
