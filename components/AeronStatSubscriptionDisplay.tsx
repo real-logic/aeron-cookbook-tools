@@ -28,23 +28,23 @@ const AeronStatSubscriptionDisplay: React.FC<Props> = ({ subscriptions }: Props)
        <span>External Subscriptions - {subscriptions.length}</span>
       </div>
       
-      <div className="py-2 grid grid-cols-7 gap-2 px-6">
-        <span className="mt-1 text-xs text-gray-500 text-medium col-span-2 break-all">Channel</span>
-        <span className="mt-1 text-xs text-gray-500 text-medium ">Session</span>
-        <span className="mt-1 text-xs text-gray-500 text-medium ">Stream ID</span>
-        <span className="mt-1 text-xs text-gray-500 text-medium ">Subs Pos</span>
-        <span className="mt-1 text-xs text-gray-500 text-medium ">Receive Pos</span>
-        <span className="mt-1 text-xs text-gray-500 text-medium ">Receive Hwm</span>
+      <div className="grid grid-cols-7 px-6">
+        <span className="pt-1 pr-2 text-xs text-gray-500 font-bold col-span-2 break-all">Channel</span>
+        <span className="pt-1 pr-2 text-xs text-gray-500 bg-blue-50 font-bold text-right">Session</span>
+        <span className="pt-1 pr-2 text-xs text-gray-500 font-bold text-right">Stream ID</span>
+        <span className="pt-1 pr-2 text-xs text-gray-500 bg-blue-50 font-bold text-right ">Subs Pos</span>
+        <span className="pt-1 pr-2 text-xs text-gray-500 font-bold text-right">Receive Pos</span>
+        <span className="pt-1 pr-2 text-xs text-gray-500 bg-blue-50 font-bold text-right ">Receive Hwm</span>
       </div>
 
       {subscriptions.map((subs) => (
-        <div key={subs.sessionId} className="py-2 grid grid-cols-7 gap-2 px-6">
-          <span className="mt-1 text-xs text-gray-900 col-span-2 break-all font-code">{subs.channel}</span>
-          <span className="mt-1 text-xs text-gray-900 font-code">{subs.sessionId}</span>
-          <span className="mt-1 text-xs text-gray-900 font-code">{subs.streamId}</span>
-          <span className="mt-1 text-xs text-gray-900 font-code">{subs.subPosition}</span>
-          <span className="mt-1 text-xs text-gray-900 font-code">{subs.receivePosition}</span>
-          <span className="mt-1 text-xs text-gray-900 font-code">{subs.receiveHighWatermark}</span>
+        <div key={subs.sessionId} className="grid grid-cols-7 px-6">
+          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 col-span-2 break-all font-code">{subs.channel}</span>
+          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 font-code bg-blue-50 text-right">{subs.sessionId}</span>
+          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 font-code text-right">{subs.streamId}</span>
+          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 font-code bg-blue-50 text-right">{subs.subPosition}</span>
+          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 font-code text-right ">{subs.receivePosition}</span>
+          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 font-code bg-blue-50 text-right ">{subs.receiveHighWatermark}</span>
         </div>
       ))}
 

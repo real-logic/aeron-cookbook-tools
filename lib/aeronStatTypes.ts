@@ -59,7 +59,9 @@ export type AeronStatOutput = {
     lossGapFills : number,
     clientLivenessTimeouts : number,  
     conductorMaxCycleTime : number,
-    conductorWorkCycleExceededCount : number
+    conductorWorkCycleExceededCount : number,
+    nameResolutionCount : number,
+    currentResolvedHost : string,
 }
 
 export enum AeronStatFeatureDetected {

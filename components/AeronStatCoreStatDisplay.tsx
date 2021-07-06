@@ -15,11 +15,11 @@
  */
 
 import { TopLevelAeronStats } from "../lib/aeronStatTypes";
+import AeronStatCoreStatDisplayRow from "./AeronStatCoreStatDisplayRow";
 
 type Props = {
   topLevelStats?: TopLevelAeronStats;
   };
-
  
 const AeronStatCoreStatDisplay: React.FC<Props> = ({ topLevelStats }: Props) => {
   return (
@@ -27,66 +27,17 @@ const AeronStatCoreStatDisplay: React.FC<Props> = ({ topLevelStats }: Props) => 
       <div className="py-2 px-6 bg-yellow-100">
        <span>Core Counters</span>
       </div>
-      <div className="py-2 grid grid-cols-4 gap-2 px-6">
-        <dt className="text-sm font-medium text-gray-500">Errors</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.errors.toLocaleString()}</dd>
-        <dt className="text-sm font-medium text-gray-500">Back Pressure Events</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.backPressureEvents.toLocaleString()}</dd>
-      </div>
-      <div className="py-2 grid grid-cols-4 gap-2 px-6">
-        <dt className="text-sm font-medium text-gray-500">Client Liveness Timeouts</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.clientLivenessTimeouts.toLocaleString()}</dd>
-        <dt className="text-sm font-medium text-gray-500">Loss Gap Fills</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.lossGapFills.toLocaleString()}</dd>
-      </div>
-      <div className="py-2 grid grid-cols-4 gap-2 px-6">
-        <dt className="text-sm font-medium text-gray-500">Short Sends</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.shortSends.toLocaleString()}</dd>
-        <dt className="text-sm font-medium text-gray-500">Invalid Packets</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.invalidPackets.toLocaleString()}</dd>
-      </div>
-      <div className="py-2 grid grid-cols-4 gap-2 px-6">
-        <dt className="text-sm font-medium text-gray-500">Naks Sent</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.naksSent.toLocaleString()}</dd>
-        <dt className="text-sm font-medium text-gray-500">Naks Received</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.naksReceived.toLocaleString()}</dd>
-      </div>
-      <div className="py-2 grid grid-cols-4 gap-2 px-6">
-        <dt className="text-sm font-medium text-gray-500">Conductor max cycle time doing its work (ns)</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.conductorMaxCycleTime.toLocaleString()}</dd>
-        <dt className="text-sm font-medium text-gray-500">Conductor work cycle exceeded threshold count</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.conductorWorkCycleExceededCount.toLocaleString()}</dd>
-      </div>
-      <div className="py-2 grid grid-cols-4 gap-2 px-6">
-        <dt className="text-sm font-medium text-gray-500">Bytes Sent</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.bytesSent.toLocaleString()}</dd>
-        <dt className="text-sm font-medium text-gray-500">Bytes Received</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.bytesReceived.toLocaleString()}</dd>
-      </div>
-      <div className="py-2 grid grid-cols-4 gap-2 px-6">
-        <dt className="text-sm font-medium text-gray-500">Heartbeats Sent</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.heartbeatsSent.toLocaleString()}</dd>
-        <dt className="text-sm font-medium text-gray-500">Heartbeats Received</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.heartbeatsReceived.toLocaleString()}</dd>
-      </div>
-      <div className="py-2 grid grid-cols-4 gap-2 px-6">
-        <dt className="text-sm font-medium text-gray-500">Status Messages Sent</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.statusMessagesSent.toLocaleString()}</dd>
-        <dt className="text-sm font-medium text-gray-500">Status Messages Received</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.statusMessagesReceived.toLocaleString()}</dd>
-      </div>
-      <div className="py-2 grid grid-cols-4 gap-2 px-6">
-        <dt className="text-sm font-medium text-gray-500">Failed attempts to free log buffers</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.failedAttemptsToFreeLogBuffers.toLocaleString()}</dd>
-        <dt className="text-sm font-medium text-gray-500">Failed offers to driver conductor proxy</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.failedOffersToDriverConductorProxy.toLocaleString()}</dd>
-      </div>
-      <div className="py-2 grid grid-cols-4 gap-2 px-6">
-        <dt className="text-sm font-medium text-gray-500">Failed offers to receiver proxy</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.failedOffersToReceiverProxy.toLocaleString()}</dd>
-        <dt className="text-sm font-medium text-gray-500">Failed offers to sender proxy</dt>
-        <dd className="mt-1 text-sm text-gray-900 ">{topLevelStats?.failedOffersToSenderProxy.toLocaleString()}</dd>
-      </div>
+      <AeronStatCoreStatDisplayRow leftName='Errors' leftValue={topLevelStats?.errors.toLocaleString()}  rightName='Back Pressure Events' rightValue={topLevelStats?.backPressureEvents.toLocaleString()}/>
+      <AeronStatCoreStatDisplayRow leftName='Client Liveness Timeouts' leftValue={topLevelStats?.clientLivenessTimeouts.toLocaleString()}  rightName='Loss Gap Fills' rightValue={topLevelStats?.lossGapFills.toLocaleString()}/>
+      <AeronStatCoreStatDisplayRow leftName='Short Sends' leftValue={topLevelStats?.shortSends.toLocaleString()}  rightName='Invalid Packets' rightValue={topLevelStats?.invalidPackets.toLocaleString()}/>
+      <AeronStatCoreStatDisplayRow leftName='Naks Sent' leftValue={topLevelStats?.naksSent.toLocaleString()}  rightName='Naks Received' rightValue={topLevelStats?.naksReceived.toLocaleString()}/>
+      <AeronStatCoreStatDisplayRow leftName='Conductor max cycle time doing its work (ns)' leftValue={topLevelStats?.conductorMaxCycleTime.toLocaleString()}  rightName='Conductor work cycle exceeded threshold count' rightValue={topLevelStats?.conductorWorkCycleExceededCount.toLocaleString()}/>
+      <AeronStatCoreStatDisplayRow leftName='Bytes Sent' leftValue={topLevelStats?.bytesSent.toLocaleString()}  rightName='Bytes Received' rightValue={topLevelStats?.bytesReceived.toLocaleString()}/>
+      <AeronStatCoreStatDisplayRow leftName='Heartbeats Sent' leftValue={topLevelStats?.heartbeatsSent.toLocaleString()}  rightName='Heartbeats Received' rightValue={topLevelStats?.heartbeatsReceived.toLocaleString()}/>
+      <AeronStatCoreStatDisplayRow leftName='Status Messages Sent' leftValue={topLevelStats?.statusMessagesSent.toLocaleString()}  rightName='Status Messages Received' rightValue={topLevelStats?.statusMessagesReceived.toLocaleString()}/>
+      <AeronStatCoreStatDisplayRow leftName='Failed attempts to free log buffers' leftValue={topLevelStats?.failedAttemptsToFreeLogBuffers.toLocaleString()}  rightName='Failed offers to driver conductor proxy' rightValue={topLevelStats?.failedOffersToDriverConductorProxy.toLocaleString()}/>
+      <AeronStatCoreStatDisplayRow leftName='Failed offers to receiver proxy' leftValue={topLevelStats?.failedOffersToReceiverProxy.toLocaleString()}  rightName='Failed offers to sender proxy' rightValue={topLevelStats?.failedOffersToSenderProxy.toLocaleString()}/>
+      <AeronStatCoreStatDisplayRow leftName='Name resolution count' leftValue={topLevelStats?.nameResolutionCount.toLocaleString()}  rightName='Current resolved address' rightValue={topLevelStats?.currentResolvedHost}/>
     </>
   );
 };

@@ -282,6 +282,8 @@ function parseTopLevelAeronStats(lines: string[]) : TopLevelAeronStats {
     let unblockedPublications = -1;
     let conductorMaxCycleTime = -1;
     let conductorWorkCycleExceededCount = -1;
+    let nameResolutionCount = -1;
+    let currentResolvedHost = '';
 
     for (let i = 2; i < lines.length - 1; i++) {
         const leftSide = lines[i].split(" - ")[0].trim();
@@ -365,6 +367,10 @@ function parseTopLevelAeronStats(lines: string[]) : TopLevelAeronStats {
         else if (rightSide.startsWith("Conductor work cycle exceeded threshold")) {
             conductorWorkCycleExceededCount = parseInt(numericLeftSide);
         }        
+        else if (rightSide.startsWith("Resolution changes: ")) {
+            nameResolutionCount = parseInt(numericLeftSide);
+            currentResolvedHost = rightSide.split("hostname=")[1].trim();
+        }        
     }
 
     return {
@@ -393,7 +399,9 @@ function parseTopLevelAeronStats(lines: string[]) : TopLevelAeronStats {
         lossGapFills : lossGapFills,
         clientLivenessTimeouts : clientLivenessTimeouts,
         conductorMaxCycleTime : conductorMaxCycleTime,
-        conductorWorkCycleExceededCount : conductorWorkCycleExceededCount
+        conductorWorkCycleExceededCount : conductorWorkCycleExceededCount,
+        nameResolutionCount : nameResolutionCount,
+        currentResolvedHost : currentResolvedHost
     }
 
 }
