@@ -22,6 +22,7 @@ import AeronStatSubscriptionDisplay from "./AeronStatSubscriptionDisplay";
 import AeronStatPublicationDisplay from "./AeronStatPublicationDisplay";
 import AeronStatInternalFlowDisplay from "./AeronStatInternalFlowDisplay";
 import AeronStatClusterStatDisplay from "./AeronStatClusterStatDisplay";
+import AeronStatCoreStatRecommendations from "./AeronStatCoreStatRecommendations";
 
 
 type Props = {
@@ -45,6 +46,9 @@ type Props = {
               <div className={aeronStatOutput.mediaDriverRunningFlag === true ? "py-4 grid grid-cols-3 gap-4 px-6" : "py-4 grid grid-cols-4 gap-4 px-6"}>
                     <dd className={aeronStatOutput.mediaDriverRunningFlag === true ? "mt-1 text-sm text-green-600 col-span-3" : "mt-1 text-sm text-red-600 col-span-3"}>{aeronStatOutput.mediaDriverRunning}</dd>
               </div>
+              {aeronStatOutput.recomendations.length > 0 && (
+                <AeronStatCoreStatRecommendations recs={aeronStatOutput.recomendations}/>
+              )}
               <AeronStatCoreStatDisplay topLevelStats={aeronStatOutput.topLevelAeronStats}/>
               {aeronStatOutput.clusterData !== undefined && (
                 <AeronStatClusterStatDisplay clusterData={aeronStatOutput.clusterData}/>

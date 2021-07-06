@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { AeronStatOutput, AeronStatParsed, AeronStatSubscription, AeronStatPublication, AeronStatInternalFlow } from "./aeronStatTypes";
+import { AeronStatOutput, AeronStatParsed, AeronStatSubscription, AeronStatPublication, AeronStatInternalFlow,
+         AeronClusterDetails, TopLevelAeronStats, AeronStatRecommendation } from "./aeronStatTypes";
 
 export function recommend(aeronStatParsed : AeronStatParsed) : AeronStatOutput {
  
@@ -28,12 +29,14 @@ export function recommend(aeronStatParsed : AeronStatParsed) : AeronStatOutput {
         mediaDriverRunning = "Media driver is not running. Last PID was " + aeronStatParsed.pid;
     }
 
+    const clusterRecommendations = checkClusterStats(aeronStatParsed.internalFlows, aeronStatParsed.clusterData, aeronStatParsed.topLevelAeronStats);
+
     return {
         mediaDriverRunning: mediaDriverRunning,
         mediaDriverRunningFlag : mediaDriverRunningFlag,
         topLevelAeronStats : aeronStatParsed.topLevelAeronStats,
         errorCount : -1,
-        recomendations: [],
+        recomendations: clusterRecommendations,
         featuresDetected: aeronStatParsed.aeronStatFeaturesDetected,
         sendSockets: aeronStatParsed.sendSockets,
         receiveSockets: aeronStatParsed.receiveSockets,
@@ -59,3 +62,44 @@ function filterPublicationInternalFlows(aeronStatPublications: AeronStatPublicat
         });
     });
 }
+function checkClusterStats(internalFlows: AeronStatInternalFlow[], clusterData?: AeronClusterDetails, topLevelAeronStats?: TopLevelAeronStats) : AeronStatRecommendation[] {
+    const recs : AeronStatRecommendation[] = [];
+
+    if (clusterData !== undefined) {
+        if (clusterData.likelyClusterStat !== true) {
+            return recs;
+        }
+    } else {
+        return recs;
+    }
+
+    if (parseInt(clusterData.clusterErrors) > 0) {
+        recs.push({level: 'WARN', message : 'Cluster errors were raised. Review raised errors from logs or with Aeron Cluster Tool'});
+    } 
+
+    if (parseInt(clusterData.clusterContainerErrors) > 0) {
+        recs.push({level: 'WARN', message : 'Cluster container errors were raised. Review raised errors from logs or with Aeron Cluster Tool'});
+    } 
+
+    let logDiff = 0;
+    let logDiffVal = '';
+
+    for(let i = 0; i < internalFlows.length; i++) {
+        if (internalFlows[i].streamId.startsWith('100 - ')) {
+            logDiff = parseInt(stripComma(internalFlows[i].diff));
+            logDiffVal = internalFlows[i].diff;
+            break;
+        }
+    }
+
+    if (logDiff !== 0) {
+        recs.push({level: 'WARN', message : 'Cluster container is running behind the cluster commit position by ' + logDiffVal + ' bytes.'});
+    }
+
+    return recs;
+}
+
+function stripComma(line: string) {
+    return line.replace(/,/g, "");
+}
+
