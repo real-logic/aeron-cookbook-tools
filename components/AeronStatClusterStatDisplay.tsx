@@ -31,8 +31,8 @@ const AeronStatClusterStatDisplay: React.FC<Props> = ({ clusterData }: Props) =>
           <span>Aeron Cluster</span>
         </div>
         <AeronStatCoreStatDisplayRow leftName='Cluster Commit Pos' leftValue={clusterData.clusterCommitPos}  rightName='Timed out clients' rightValue={clusterData.timedOutClientCount}/>
-        <AeronStatCoreStatDisplayRow leftName='Cluster Container Errors' leftValue={clusterData.clusterContainerErrors}  rightName='Cluster Errors' rightValue={clusterData.clusterErrors}/>
-        <AeronStatCoreStatDisplayRow leftName='Consensus Module State' leftValue={clusterData.consensusModuleState}  rightName='Cluster Node Role' rightValue={clusterData.nodeRole}/>
+        <AeronStatCoreStatDisplayRow leftName='Cluster Node Role' leftValue={clusterData.nodeRole}  rightName='Cluster Errors' rightValue={clusterData.clusterErrors}/>
+        <AeronStatCoreStatDisplayRow leftName='Consensus Module State' leftValue={clusterData.consensusModuleState}  rightName='Cluster Container Errors' rightValue={clusterData.clusterContainerErrors}/>
         <AeronStatCoreStatDisplayRow leftName='Election State' leftValue={clusterData.electionState}  rightName='Snapshot Count' rightValue={clusterData.snapshotCount}/>
       </>
     )}

@@ -29,7 +29,7 @@ export function recommend(aeronStatParsed : AeronStatParsed) : AeronStatOutput {
         mediaDriverRunning = "Media driver is not running. Last PID was " + aeronStatParsed.pid;
     }
 
-    const clusterRecommendations = checkClusterStats(aeronStatParsed.internalFlows, aeronStatParsed.clusterData, aeronStatParsed.topLevelAeronStats);
+    const clusterRecommendations = checkStats(aeronStatParsed.internalFlows, aeronStatParsed.clusterData, aeronStatParsed.topLevelAeronStats);
 
     return {
         mediaDriverRunning: mediaDriverRunning,
@@ -62,8 +62,24 @@ function filterPublicationInternalFlows(aeronStatPublications: AeronStatPublicat
         });
     });
 }
-function checkClusterStats(internalFlows: AeronStatInternalFlow[], clusterData?: AeronClusterDetails, topLevelAeronStats?: TopLevelAeronStats) : AeronStatRecommendation[] {
+function checkStats(internalFlows: AeronStatInternalFlow[], clusterData?: AeronClusterDetails, topLevelAeronStats?: TopLevelAeronStats) : AeronStatRecommendation[] {
     const recs : AeronStatRecommendation[] = [];
+
+    if (topLevelAeronStats === undefined) {
+        return recs;
+    }
+
+    if (topLevelAeronStats.errors > 0) {
+        recs.push({level: 'WARN', message : 'Aeron errors were raised. Review raised errors from logs or with Aeron ErrorStat Tool'});
+    } 
+
+
+    for(let i = 0; i < internalFlows.length; i++) {
+        const logDiff = parseInt(stripComma(internalFlows[i].diff));
+        if (Math.abs(logDiff) > 0) {
+            recs.push({level: 'WARN', message : 'Stream ' + internalFlows[i].streamId + ' is running behind by '+Math.abs(logDiff).toLocaleString()+'. Production is faster than consumption, and may result in backpressure.'});
+        }
+    }
 
     if (clusterData !== undefined) {
         if (clusterData.likelyClusterStat !== true) {
@@ -82,18 +98,16 @@ function checkClusterStats(internalFlows: AeronStatInternalFlow[], clusterData?:
     } 
 
     let logDiff = 0;
-    let logDiffVal = '';
 
     for(let i = 0; i < internalFlows.length; i++) {
         if (internalFlows[i].streamId.startsWith('100 - ')) {
             logDiff = parseInt(stripComma(internalFlows[i].diff));
-            logDiffVal = internalFlows[i].diff;
             break;
         }
     }
 
     if (logDiff !== 0) {
-        recs.push({level: 'WARN', message : 'Cluster container is running behind the cluster commit position by ' + logDiffVal + ' bytes.'});
+        recs.push({level: 'WARN', message : 'Cluster container is running behind the cluster commit position by ' + Math.abs(logDiff).toLocaleString()+ ' bytes.'});
     }
 
     return recs;
