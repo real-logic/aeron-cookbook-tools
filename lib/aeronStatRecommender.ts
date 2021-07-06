@@ -40,6 +40,7 @@ export function recommend(aeronStatParsed : AeronStatParsed) : AeronStatOutput {
         aeronStatSubscriptions: filterSubscriptionInternalFlows(aeronStatParsed.aeronStatSubscriptions, aeronStatParsed.internalFlows),
         aeronStatPublications: filterPublicationInternalFlows(aeronStatParsed.aeronStatPublications, aeronStatParsed.internalFlows),
         internalFlows: aeronStatParsed.internalFlows,
+        clusterData: aeronStatParsed.clusterData
     }
 }
 

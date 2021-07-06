@@ -30,7 +30,8 @@ export type AeronStatOutput = {
     featuresDetected: AeronStatFeatureDetected[],
     aeronStatPublications : AeronStatPublication[],
     aeronStatSubscriptions : AeronStatSubscription[],
-    internalFlows : AeronStatInternalFlow[]
+    internalFlows : AeronStatInternalFlow[],
+    clusterData? : AeronClusterDetails
   }
 
   export type TopLevelAeronStats = {
@@ -74,34 +75,35 @@ export enum AeronStatFeatureDetected {
 }
 
 
-export const clusterElectionState = new Map<string, string>([
-    ["0", "INIT"],
-    ["1", "CANVASS"],
-    ["2", "NOMINATE"],
-    ["3", "CANDIDATE_BALLOT"],
-    ["4", "FOLLOWER_BALLOT"],
-    ["5", "LEADER_LOG_REPLICATION"],
-    ["6", "LEADER_REPLAY"],
-    ["7", "LEADER_INIT"],
-    ["8", "LEADER_READY"],
-    ["9", "FOLLOWER_LOG_REPLICATION"],
-    ["10", "FOLLOWER_REPLAY"],
-    ["11", "FOLLOWER_CATCHUP_INIT"],
-    ["12", "FOLLOWER_CATCHUP_AWAIT"],
-    ["13", "FOLLOWER_CATCHUP"],
-    ["14", "FOLLOWER_LOG_INIT"],
-    ["15", "FOLLOWER_LOG_INIT"],
-    ["16", "FOLLOWER_READY"],
-    ["17", "CLOSED"],
+
+export const clusterElectionStateValues = new Map<string, string>([
+    ["0", "Init"],
+    ["1", "Canvass"],
+    ["2", "Nominate"],
+    ["3", "Candidate Ballot"],
+    ["4", "Follower Ballot"],
+    ["5", "Leader Log Replication"],
+    ["6", "Leader Replay"],
+    ["7", "Leader Init"],
+    ["8", "Leader Ready"],
+    ["9", "Follower Log Replication"],
+    ["10", "Follower Replay"],
+    ["11", "Follower Catchup Init"],
+    ["12", "Follower Catchup Await"],
+    ["13", "Follower Catchup"],
+    ["14", "Follower Log Init"],
+    ["15", "Follower Log Await"],
+    ["16", "Follower Replay"],
+    ["17", "Closed"],
   ]); 
 
-export const clusterNodeRole = new Map<string, string>([
+export const clusterNodeRoleValues = new Map<string, string>([
     ["0", "Follower"],
     ["1", "Candidate"],
     ["2", "Leader"]
   ]); 
 
-export const consensusModuleState = new Map<string, string>([
+export const consensusModuleStateValues = new Map<string, string>([
     ["0", "Initializing"],
     ["1", "Active"],
     ["2", "Suspended"],
@@ -118,6 +120,7 @@ export const defaultStreams = new Map<string, string>([
     ["10", "Archive Control Req"],
     ["20", "Archive Control Resp"],
     ["30", "Archive Recording Events"],
+    ["100", "Log Stream"],
     ["101", "Cluster Ingress"],
     ["102", "Cluster Egress"],
     ["103", "Replay Stream"],
@@ -127,6 +130,19 @@ export const defaultStreams = new Map<string, string>([
     ["107", "Consensus Module Snapshot"],
     ["108", "Consensus Stream"]
   ]); 
+
+
+export type AeronClusterDetails = {
+    likelyClusterStat : boolean, 
+    electionState? : string,
+    nodeRole? : string,
+    consensusModuleState? : string,
+    timedOutClientCount : string,
+    clusterContainerErrors : string,
+    clusterErrors : string,
+    snapshotCount : string,
+    clusterCommitPos : string,
+}
 
 export type AeronStatPublication = {
     channel : string,
@@ -193,5 +209,6 @@ export type AeronStatParsed = {
     sendSockets : SendSocket[],
     receiveSockets : ReceiveSocket[],
     internalFlows : AeronStatInternalFlow[],
-    error : string
+    error : string,
+    clusterData? : AeronClusterDetails
 }

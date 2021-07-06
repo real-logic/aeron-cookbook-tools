@@ -21,6 +21,7 @@ import AeronStatCoreSocketDisplay from "./AeronStatCoreSocketDisplay";
 import AeronStatSubscriptionDisplay from "./AeronStatSubscriptionDisplay";
 import AeronStatPublicationDisplay from "./AeronStatPublicationDisplay";
 import AeronStatInternalFlowDisplay from "./AeronStatInternalFlowDisplay";
+import AeronStatClusterStatDisplay from "./AeronStatClusterStatDisplay";
 
 
 type Props = {
@@ -45,6 +46,9 @@ type Props = {
                     <dd className={aeronStatOutput.mediaDriverRunningFlag === true ? "mt-1 text-sm text-green-600 col-span-3" : "mt-1 text-sm text-red-600 col-span-3"}>{aeronStatOutput.mediaDriverRunning}</dd>
               </div>
               <AeronStatCoreStatDisplay topLevelStats={aeronStatOutput.topLevelAeronStats}/>
+              {aeronStatOutput.clusterData !== undefined && (
+                <AeronStatClusterStatDisplay clusterData={aeronStatOutput.clusterData}/>
+              )}
               <AeronStatInternalFlowDisplay flows={aeronStatOutput.internalFlows}/>
               <AeronStatPublicationDisplay publications={aeronStatOutput.aeronStatPublications}/>
               <AeronStatSubscriptionDisplay subscriptions={aeronStatOutput.aeronStatSubscriptions}/>

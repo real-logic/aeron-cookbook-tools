@@ -15,7 +15,7 @@
  */
 
 import { AeronStatParsed, SendSocket, ReceiveSocket, TopLevelAeronStats, AeronStatSubscription,
-         AeronStatPublication, defaultStreams, AeronStatFeatureDetected, AeronStatInternalFlow } from "./aeronStatTypes";
+         AeronStatPublication, defaultStreams, AeronStatFeatureDetected, AeronStatInternalFlow, AeronClusterDetails, consensusModuleStateValues, clusterNodeRoleValues, clusterElectionStateValues } from "./aeronStatTypes";
 
 export function parseAeronStat(stats: string) : AeronStatParsed {
     const lines = stats.split("\n");
@@ -35,6 +35,7 @@ export function parseAeronStat(stats: string) : AeronStatParsed {
             sendSockets : [],
             receiveSockets : [],
             internalFlows : [],
+            clusterData : undefined
         }
     }  
 
@@ -65,6 +66,7 @@ export function parseAeronStat(stats: string) : AeronStatParsed {
     const aeronStatFeaturesDetected = parseAeronStatFeaturesDetected(lines);
     
     //archive
+    const clusterData = parseClusterData(lines);
     //cluster
     //artio
 
@@ -80,6 +82,7 @@ export function parseAeronStat(stats: string) : AeronStatParsed {
         sendSockets : sendSockets,
         receiveSockets : receiveSockets,
         internalFlows : internalFlows,
+        clusterData : clusterData
     }
 }
 
@@ -188,6 +191,63 @@ function parsePublications(lines: string[]) : AeronStatPublication[] {
     });
 
     return aeronStatPublications.sort((left, right) => (left.streamId > right.streamId ? -1 : 1)).reverse();
+}
+
+function parseClusterData(lines: string[]) : AeronClusterDetails {
+    let electionState = '';
+    let likelyClusterStat = false;
+    let nodeRole = '';
+    let consensusModuleState = '';
+    let timedOutClientCount = '';
+    let clusterContainerErrors = '';
+    let clusterErrors = '';
+    let snapshotCount = '';
+    let clusterCommitPos = '';
+
+
+    for (let i = 2; i < lines.length - 1; i++) {
+        const leftSide = lines[i].split(" - ")[0].trim();
+        const numericLeftSide = stripComma(leftSide.split(":")[1].trim());
+        const rightSide = lines[i].split(" - ")[1].trim();
+
+        if (rightSide.startsWith("Cluster Errors")) {
+            clusterErrors = parseInt(numericLeftSide).toLocaleString();
+        }
+        else if (rightSide.startsWith("Consensus Module state")) {
+            consensusModuleState = consensusModuleStateValues.get(numericLeftSide) === undefined ? '?' : consensusModuleStateValues.get(numericLeftSide)!;
+        }
+        else if (rightSide.startsWith("Cluster node role")) {
+            nodeRole = clusterNodeRoleValues.get(numericLeftSide) === undefined ? '?' : clusterNodeRoleValues.get(numericLeftSide)!;
+            likelyClusterStat = true;
+        }
+        else if (rightSide.startsWith("Cluster election state")) {
+            electionState = clusterElectionStateValues.get(numericLeftSide) === undefined ? '?' : clusterElectionStateValues.get(numericLeftSide)!;
+        }
+        else if (rightSide.startsWith("Cluster timed out client count")) {
+            timedOutClientCount = parseInt(numericLeftSide).toLocaleString();
+        }
+        else if (rightSide.startsWith("Cluster Container Errors")) {
+            clusterContainerErrors = parseInt(numericLeftSide).toLocaleString();
+        }
+        else if (rightSide.startsWith("Cluster snapshot count")) {
+            snapshotCount = parseInt(numericLeftSide).toLocaleString();
+        }
+        else if (rightSide.startsWith("Cluster commit-pos")) {
+            clusterCommitPos = parseInt(numericLeftSide).toLocaleString();
+        }
+    }
+
+    return {
+        electionState : electionState,
+        nodeRole : nodeRole,
+        likelyClusterStat : likelyClusterStat,
+        clusterCommitPos : clusterCommitPos,
+        consensusModuleState : consensusModuleState,
+        timedOutClientCount : timedOutClientCount,
+        clusterContainerErrors : clusterContainerErrors,
+        clusterErrors : clusterErrors,
+        snapshotCount : snapshotCount
+    };
 }
 
 function parsePublication(lines: string[], sessionId : string) : AeronStatPublication {
