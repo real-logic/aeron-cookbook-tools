@@ -15,6 +15,7 @@
  */
 
 import { AeronStatPublication } from "../lib/aeronStatTypes";
+import AeronStatChannelDisplay from "./AeronStatChannelDisplay";
 
 type Props = {
   publications: AeronStatPublication[];
@@ -41,7 +42,7 @@ const AeronStatPublicationDisplay: React.FC<Props> = ({ publications }: Props) =
 
       {publications.map((pub) => (
         <div key={pub.sessionId} className="grid grid-cols-9 px-6">
-          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 col-span-2 break-all font-code">{pub.channel}</span>
+          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 col-span-2 break-all font-code"><AeronStatChannelDisplay channelData={pub.channelParsed}/></span>
           <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 bg-blue-50 font-code text-right">{pub.sessionId}</span>
           <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 font-code text-right">{pub.streamId}</span>
           <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 bg-blue-50 font-code text-right">{pub.sendBackPressureEvents}</span>

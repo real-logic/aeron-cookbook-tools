@@ -15,7 +15,9 @@
  */
 
 import { AeronStatParsed, SendSocket, ReceiveSocket, TopLevelAeronStats, AeronStatSubscription,
-         AeronStatPublication, defaultStreams, AeronStatFeatureDetected, AeronStatInternalFlow, AeronClusterDetails, consensusModuleStateValues, clusterNodeRoleValues, clusterElectionStateValues } from "./aeronStatTypes";
+         AeronStatPublication, defaultStreams, AeronStatFeatureDetected, AeronStatInternalFlow,
+         AeronClusterDetails, consensusModuleStateValues, clusterNodeRoleValues, clusterElectionStateValues,
+        AeronChannel, AeronChannelSection } from "./aeronStatTypes";
 
 export function parseAeronStat(stats: string) : AeronStatParsed {
     const lines = stats.split("\n");
@@ -158,6 +160,7 @@ function parseSubscription(lines: string[], sessionId : string) : AeronStatSubsc
     return {
         sessionId : sessionId,
         channel : rightPart2[3],
+        channelParsed: parseAeronChannel(rightPart2[3]),
         streamId : streamIdDecorated,
         subPosition : subPosition,
         subPositionNumeric : subPositionNumeric,
@@ -302,6 +305,7 @@ function parsePublication(lines: string[], sessionId : string) : AeronStatPublic
     return {
         sessionId : sessionId,
         channel : rightPart2[3],
+        channelParsed: parseAeronChannel(rightPart2[3]),
         streamId : streamIdDecorated,
         pubPositionSampled : pubPos,
         pubPositionSampledNumeric : pubPositionSampledNumeric,
@@ -314,6 +318,67 @@ function parsePublication(lines: string[], sessionId : string) : AeronStatPublic
     }
 }
 
+function parseAeronChannel(channel: string) : AeronChannel {
+    //aeron:udp?term-length=65536|sparse=true|mtu=1408|endpoint=10.49.20.37:5945
+    //aeron:ipc
+    //aeron:udp?fc=min,t:30s|tags=53,52|control-mode=manual|alias=log|ssc=false
+    //aeron-spy:aeron:udp?control=10.49.20.191:10009|control-mode=dynamic|session-id=-17973521|alias=egress @0
+
+    const spy = channel.indexOf("aeron-spy") > -1;
+    const firstCut = channel.split("aeron:");
+    console.log(firstCut);
+    if (firstCut.length < 2 || spy) {
+        return {
+            success: false,
+            channel: channel,
+            media: '',
+            sections: []
+        }
+    }
+
+    const includesQuestion = channel.indexOf("?") > -1;
+    const includesPipe = channel.indexOf("|") > -1;
+    let media = '';
+    if (!includesQuestion) {
+        media = firstCut[1];
+    } else {
+        const secondCut = firstCut[1].split("?");
+        media = secondCut[0];
+    }
+
+    const sections = [];
+
+    if (includesQuestion) {
+        const paramSide = firstCut[1].split("?");
+        if (includesPipe) {
+            const args = paramSide[1].split("|");
+            for (let i = 0; i < args.length; i++) {
+                const arg = args[i].split("=");
+                sections.push({
+                    order: i,
+                    key: arg[0],
+                    value: arg[1]
+                });
+            }
+        } else {
+            const arg = paramSide[1].split("=");
+            sections.push({
+                order: 0,
+                key: arg[0],
+                value: arg[1]
+            });
+        }
+    }
+
+    sections.sort((left, right) => (left.order > right.order ? -1 : 1));
+
+    return {
+        success: true,
+        media: media,
+        channel: channel,
+        sections: sections
+    }
+}
 
 function parseTopLevelAeronStats(lines: string[]) : TopLevelAeronStats {
     let bytesSent = -1;
@@ -341,6 +406,7 @@ function parseTopLevelAeronStats(lines: string[]) : TopLevelAeronStats {
     let unblockedControlCommands = -1;
     let unblockedPublications = -1;
     let conductorMaxCycleTime = -1;
+    let conductorMaxCycleTimeSeconds = -1;
     let conductorWorkCycleExceededCount = -1;
     let nameResolutionCount = -1;
     let currentResolvedHost = '';
@@ -431,6 +497,7 @@ function parseTopLevelAeronStats(lines: string[]) : TopLevelAeronStats {
         }        
         else if (rightSide.startsWith("Conductor max cycle time doing its work")) {
             conductorMaxCycleTime = parseInt(numericLeftSide);
+            conductorMaxCycleTimeSeconds = conductorMaxCycleTime / 1000000000;
         }        
         else if (rightSide.startsWith("Conductor work cycle exceeded threshold")) {
             conductorWorkCycleExceededCount = parseInt(numericLeftSide);
@@ -470,7 +537,8 @@ function parseTopLevelAeronStats(lines: string[]) : TopLevelAeronStats {
         conductorWorkCycleExceededCount : conductorWorkCycleExceededCount,
         nameResolutionCount : nameResolutionCount,
         currentResolvedHost : currentResolvedHost,
-        connectedAeronClients : connectedAeronClients
+        connectedAeronClients : connectedAeronClients,
+        conductorMaxCycleTimeSeconds : conductorMaxCycleTimeSeconds
     }
 
 }

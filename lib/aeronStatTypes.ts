@@ -35,6 +35,19 @@ export type AeronStatOutput = {
     clusterData? : AeronClusterDetails
   }
 
+  export type AeronChannel = {
+      success: boolean,
+    channel: string,
+    media: string,
+    sections: AeronChannelSection[],
+  }
+
+  export type AeronChannelSection = {
+      order: number,
+      key: string,
+      value: string,
+  }
+
   export type TopLevelAeronStats = {
     bytesSent : number,
     bytesReceived : number,
@@ -61,6 +74,7 @@ export type AeronStatOutput = {
     lossGapFills : number,
     clientLivenessTimeouts : number,  
     conductorMaxCycleTime : number,
+    conductorMaxCycleTimeSeconds : number,
     conductorWorkCycleExceededCount : number,
     nameResolutionCount : number,
     currentResolvedHost : string,
@@ -148,6 +162,7 @@ export type AeronClusterDetails = {
 
 export type AeronStatPublication = {
     channel : string,
+    channelParsed : AeronChannel,
     sessionId : string,
     streamId : string,
     mystery : string,
@@ -162,6 +177,7 @@ export type AeronStatPublication = {
 
 export type AeronStatSubscription = {
     channel : string,
+    channelParsed : AeronChannel,
     sessionId : string,
     streamId : string,
     mystery : string,
