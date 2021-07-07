@@ -113,7 +113,7 @@ function checkStats(internalFlows: AeronStatInternalFlow[], clusterData?: AeronC
         if (topLevelAeronStats.retransmitsSent > 1) {
             times = 'times';
         }
-        recs.push({level: 'WARN', message : 'Aeron had to retransmit data '+ topLevelAeronStats.retransmitsSent +' ' +times+'.', weight:500});
+        recs.push({level: 'WARN', message : 'The Media Driver had to retransmit data '+ topLevelAeronStats.retransmitsSent +' ' +times+'.', weight:500});
     }
 
     if (clusterData !== undefined) {
