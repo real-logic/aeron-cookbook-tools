@@ -53,9 +53,15 @@ type Props = {
               {aeronStatOutput.clusterData !== undefined && (
                 <AeronStatClusterStatDisplay clusterData={aeronStatOutput.clusterData}/>
               )}
-              <AeronStatInternalFlowDisplay flows={aeronStatOutput.internalFlows}/>
-              <AeronStatPublicationDisplay publications={aeronStatOutput.aeronStatPublications}/>
-              <AeronStatSubscriptionDisplay subscriptions={aeronStatOutput.aeronStatSubscriptions}/>
+              {aeronStatOutput.internalFlows.length > 0 && (
+                <AeronStatInternalFlowDisplay flows={aeronStatOutput.internalFlows}/>
+              )}
+              {aeronStatOutput.aeronStatPublications.length > 0 && (
+                <AeronStatPublicationDisplay publications={aeronStatOutput.aeronStatPublications}/>
+              )}
+              {aeronStatOutput.aeronStatSubscriptions.length > 0 && (
+                <AeronStatSubscriptionDisplay subscriptions={aeronStatOutput.aeronStatSubscriptions}/>
+              )}
               <AeronStatCoreSocketDisplay sendSockets={aeronStatOutput.sendSockets} receiveSockets={aeronStatOutput.receiveSockets}/>
             </dl>
           </div>

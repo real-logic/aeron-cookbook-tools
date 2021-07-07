@@ -344,6 +344,14 @@ function parseTopLevelAeronStats(lines: string[]) : TopLevelAeronStats {
     let conductorWorkCycleExceededCount = -1;
     let nameResolutionCount = -1;
     let currentResolvedHost = '';
+    let connectedAeronClients = 0;
+
+    for (let i = 2; i < lines.length - 1; i++) {
+        const rightSide = lines[i].split(" - ")[1].trim();
+        if (rightSide.startsWith("client-heartbeat:")) {
+            connectedAeronClients += 1;
+        }
+    }
 
     for (let i = 2; i < lines.length - 1; i++) {
         const leftSide = lines[i].split(" - ")[0].trim();
@@ -461,7 +469,8 @@ function parseTopLevelAeronStats(lines: string[]) : TopLevelAeronStats {
         conductorMaxCycleTime : conductorMaxCycleTime,
         conductorWorkCycleExceededCount : conductorWorkCycleExceededCount,
         nameResolutionCount : nameResolutionCount,
-        currentResolvedHost : currentResolvedHost
+        currentResolvedHost : currentResolvedHost,
+        connectedAeronClients : connectedAeronClients
     }
 
 }

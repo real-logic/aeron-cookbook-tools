@@ -19,7 +19,7 @@ import Meta from '../components/Meta';
 import React, { Fragment, useState } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/solid'
 import { EyeIcon } from '@heroicons/react/outline'
-import { Switch, Listbox, Transition } from '@headlessui/react'
+import { Listbox, Transition } from '@headlessui/react'
 import { IoIosSpeedometer } from 'react-icons/io';
 import { FaTools } from 'react-icons/fa';
 import { AeronStatOutput } from '../lib/aeronStatTypes';
@@ -44,7 +44,6 @@ const publishingOptions = [
 const Layout = () => {
   const [formState, setFormState] = React.useState('Paste AeronStat output here');
   const [data, setData] = React.useState<AeronStatOutput>();
-  const [enabled, setEnabled] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [selected, setSelected] = useState(publishingOptions[0])

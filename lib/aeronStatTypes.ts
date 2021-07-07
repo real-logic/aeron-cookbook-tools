@@ -17,6 +17,7 @@
 export type AeronStatRecommendation = {
     level : string;
     message : string;
+    weight : number
 }
 
 export type AeronStatOutput = {
@@ -63,6 +64,7 @@ export type AeronStatOutput = {
     conductorWorkCycleExceededCount : number,
     nameResolutionCount : number,
     currentResolvedHost : string,
+    connectedAeronClients : number,
 }
 
 export enum AeronStatFeatureDetected {

@@ -15,7 +15,7 @@
  */
 
 import { AeronStatRecommendation } from "../lib/aeronStatTypes";
-import { XCircleIcon } from '@heroicons/react/outline'
+import { InformationCircleIcon } from '@heroicons/react/outline'
 
 
 type Props = {
@@ -28,18 +28,18 @@ const AeronStatCoreStatRecommendations: React.FC<Props> = ({ recs }: Props) => {
       <div className="py-2 px-6 bg-yellow-100">
        <span>Recommendations</span>
       </div>
-      <div className="flex bg-red-50 px-6 py-6">
+      <div className="flex px-6 py-6">
         <div className="flex-shrink-0">
-          <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+          <InformationCircleIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
         </div>
         <div className="ml-3 ">
-          <h3 className="text-sm font-medium text-red-800">There were issues that require attention</h3>
-          <div className="mt-2 text-sm text-red-700">
-            <ul className="list-disc pl-5 space-y-1">
+          <h3 className="text-sm font-bold text-black">There were issues that require attention</h3>
+          <div className="mt-2 text-sm text-black">
+            <ol className="list-decimal pl-5 space-y-1">
               {recs.map((rec) => (
                 <li key={rec.message}>{rec.message}</li>
               ))}
-            </ul>
+            </ol>
           </div>
         </div>
       </div>
