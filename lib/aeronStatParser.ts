@@ -370,7 +370,7 @@ function parseAeronChannel(channel: string) : AeronChannel {
         }
     }
 
-    sections.sort((left, right) => (left.order > right.order ? -1 : 1));
+    sections.sort((left, right) => (left.order < right.order ? -1 : 1));
 
     return {
         success: true,
@@ -651,6 +651,7 @@ function parseInternalFlows(publications: AeronStatPublication[], subscriptions:
             if (subscription.sessionId === publication.sessionId) {
                 internalFlows.push({
                     channel : publication.channel,
+                    channelParsed : publication.channelParsed,
                     pubLimit : publication.pubLimit,
                     streamId : publication.streamId,
                     sendLimit : publication.sendLimit,

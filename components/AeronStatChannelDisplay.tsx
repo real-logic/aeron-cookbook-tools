@@ -17,22 +17,43 @@
 import { AeronChannel } from "../lib/aeronStatTypes";
 
 const componentColors = new Map<string, string>([
-  ['endpoint', 'bg-blue-200'],
-  ['linger', 'bg-blue-800 text-white'],
-  ['term-length', 'bg-pink-200'],
-  ['control', 'bg-pink-800 text-white'],
-  ['fc', 'bg-red-200'],
-  ['rejoin', 'bg-red-600 text-white'],
-  ['mtu', 'bg-gray-200'],
-  ['group', 'bg-gray-600 text-white'],
-  ['sparse', 'bg-green-200'],
-  ['control-mode', 'bg-green-800 text-white'],
-  ['term-id', 'bg-purple-200'],
-  ['term-offset', 'bg-purple-800 text-white'],
-  ['tags', 'bg-indigo-200'],
-  ['session-id', 'bg-indigo-800 text-white'],
-  ['init-term-id', 'bg-yellow-200'],
-  ['alias', 'bg-yellow-800 text-white'],
+  ['endpoint', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-blue-200'],
+  ['linger', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-blue-800 text-white'],
+  ['term-length', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-pink-200'],
+  ['control', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-pink-800 text-white'],
+  ['fc', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-red-100'],
+  ['ssc', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-blue-500 text-white'],
+  ['rejoin', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-red-600 text-white'],
+  ['mtu', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-gray-200'],
+  ['group', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-gray-600 text-white'],
+  ['sparse', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-green-200'],
+  ['control-mode', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-green-800 text-white'],
+  ['term-id', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-purple-200'],
+  ['term-offset', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-purple-800 text-white'],
+  ['tags', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-indigo-200'],
+  ['session-id', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-indigo-800 text-white'],
+  ['init-term-id', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-yellow-200'],
+  ['alias', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-yellow-800 text-white'],
+]);
+
+
+const explains = new Map<string, string>([
+  ['endpoint', 'the endpoint for this channel'],
+  ['linger', 'the length of time the channel should linger for'],
+  ['term-length', 'the term length for this channel. max message length is min(16MB, term-length/8). log buffers are approximately 3x the term length.'],
+  ['control', 'the MDC control endpoint'],
+  ['fc', 'the flow control arguments'],
+  ['rejoin', 'signals if the channel should rejoin after loss'],
+  ['mtu', 'the largest packet size for this channel'],
+  ['group', 'the flow control group for this channel'],
+  ['sparse', 'if true, the log buffer is sparse on the file system'],
+  ['control-mode', 'MDC control mode'],
+  ['term-id', 'the term id for this channel'],
+  ['term-offset', 'the term offset for this channel'],
+  ['tags', 'the tags for this channel'],
+  ['session-id', 'the session id for this channel'],
+  ['init-term-id', 'the initial term id for this channel'],
+  ['alias', 'the channel alias'],
 ]);
 
 type Props = {
@@ -45,9 +66,9 @@ const AeronStatChannelDisplay: React.FC<Props> = ({ channelData }: Props) => {
     <>
     {channelData.success === true && (
       <>
-          <span className="font-code">aeron:{channelData.media}?
+          <span className="font-code">aeron:{channelData.media}?<br/>
           {channelData.sections.map((part) => (
-            <span key={part.key} className={componentColors.get(part.key) === undefined ? '' : componentColors.get(part.key)}>{part.key}={part.value}|</span>
+            <><span key={part.key} className={componentColors.get(part.key) === undefined ? '' : componentColors.get(part.key)}>{part.key}={part.value}<span className='tooltip'>{explains.get(part.key) === undefined ? '' : explains.get(part.key)}</span></span><span>|</span><br/></>
           ))}
           </span>
       </>

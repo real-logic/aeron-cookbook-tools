@@ -15,6 +15,7 @@
  */
 
 import { AeronStatInternalFlow } from "../lib/aeronStatTypes";
+import AeronStatChannelDisplay from "./AeronStatChannelDisplay";
 
 type Props = {
   flows: AeronStatInternalFlow[];
@@ -40,7 +41,7 @@ const AeronStatInternalFlowDisplay: React.FC<Props> = ({ flows }: Props) => {
 
       {flows.map((flow) => (
         <div key={flow.sessionId} className="grid grid-cols-9 px-6">
-          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900  col-span-3 break-all font-code">{flow.channel}</span>
+          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900  col-span-3 break-all font-code"><AeronStatChannelDisplay channelData={flow.channelParsed}/></span>
           <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 font-code bg-blue-50 text-right">{flow.sessionId}</span>
           <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 font-code text-right">{flow.streamId}</span>
           <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 font-code bg-blue-50 text-right">{flow.pubPositionSampled}</span>

@@ -191,6 +191,7 @@ export type AeronStatSubscription = {
 
 export type AeronStatInternalFlow = {
     channel : string,
+    channelParsed : AeronChannel,
     sessionId : string,
     streamId : string,
     mystery : string,
