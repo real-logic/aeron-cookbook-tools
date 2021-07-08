@@ -573,8 +573,8 @@ function parseSendSockets(lines: string[]) : SendSocket[] {
         const rightSide = lines[i].split(" - ")[1].trim();
         if (rightSide.startsWith("snd-local-sockaddr")) {
             const rightPart1 = rightSide.split(": ")[1].trim();
-            const lookupLine = rightPart1.split(" ")[0].trim();
-            const rightPart2 = rightPart1.split(" ")[1].trim();
+            const lookupLine = rightPart1.split(" ")[0].trim();
+            const rightPart2 = rightPart1.split(" ")[1].trim();
 
             let channelVal = '';
             for (let j = 0; j < linesWithChannels.length; j++) {
@@ -599,8 +599,8 @@ function parseReceiveSockets(lines: string[]) : ReceiveSocket[] {
         const rightSide = lines[i].split(" - ")[1].trim();
         if (rightSide.startsWith("rcv-local-sockaddr")) {
             const rightPart1 = rightSide.split(": ")[1].trim();
-            const lookupLine = rightPart1.split(" ")[0].trim();
-            const rightPart2 = rightPart1.split(" ")[1].trim();
+            const lookupLine = rightPart1.split(" ")[0].trim();
+            const rightPart2 = rightPart1.split(" ")[1].trim();
 
             let channelVal = '';
             for (let j = 0; j < linesWithChannels.length; j++) {
