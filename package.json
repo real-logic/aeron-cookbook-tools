@@ -20,7 +20,8 @@
     "export": "next export",
     "type-check": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "prettier-format": "prettier --config .prettierrc.json 'lib/**/*.ts' --write"
   },
   "dependencies": {
     "@headlessui/react": "^1.3.0",
