@@ -14,29 +14,36 @@
  * limitations under the License.
  */
 
-import { AeronStatFeatureDetected } from "../lib/aeronStatTypes";
+import React from 'react';
+import { AeronStatFeatureDetected } from '../lib/aeronStatTypes';
 
 type Props = {
   featuresDetected: AeronStatFeatureDetected[];
-  };
+};
 
-  const myMap = new Map<AeronStatFeatureDetected, string>([
-    [AeronStatFeatureDetected.AERON_IPC, "Aeron IPC"],
-    [AeronStatFeatureDetected.AERON_UDP, "Aeron UDP"],
-    [AeronStatFeatureDetected.ARTIO, "Artio"],
-    [AeronStatFeatureDetected.AERON_ARCHIVE_SERVER, "Aeron Archive Server"],
-    [AeronStatFeatureDetected.AERON_CLUSTER, "Aeron Cluster"]
-  ]); 
-  
-const AeronStatFeaturePills: React.FC<Props> = ({ featuresDetected }: Props) => {
+const myMap = new Map<AeronStatFeatureDetected, string>([
+  [AeronStatFeatureDetected.AERON_IPC, 'Aeron IPC'],
+  [AeronStatFeatureDetected.AERON_UDP, 'Aeron UDP'],
+  [AeronStatFeatureDetected.ARTIO, 'Artio'],
+  [AeronStatFeatureDetected.AERON_ARCHIVE_SERVER, 'Aeron Archive Server'],
+  [AeronStatFeatureDetected.AERON_CLUSTER, 'Aeron Cluster']
+]);
+
+const AeronStatFeaturePills: React.FC<Props> = ({
+  featuresDetected
+}: Props) => {
   return (
     <>
       {featuresDetected.map((featureDetected) => (
-        <span key={featureDetected} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 ml-2">{myMap.get(featuresDetected[featureDetected])}</span>
+        <span
+          key={featureDetected}
+          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 ml-2"
+        >
+          {myMap.get(featuresDetected[featureDetected])}
+        </span>
       ))}
     </>
   );
 };
-  
+
 export default AeronStatFeaturePills;
-  

@@ -14,23 +14,37 @@
  * limitations under the License.
  */
 
+import React from 'react';
+
 type Props = {
-  leftName: string,
-  leftValue?: string,
-  rightName: string,
-  rightValue?: string
+  leftName: string;
+  leftValue?: string;
+  rightName: string;
+  rightValue?: string;
 };
- 
-const AeronStatCoreStatDisplayRow: React.FC<Props> = ({ leftName, leftValue, rightName, rightValue }: Props) => {
+
+const AeronStatCoreStatDisplayRow: React.FC<Props> = ({
+  leftName,
+  leftValue,
+  rightName,
+  rightValue
+}: Props) => {
   return (
-      <div className="grid grid-cols-4 gap-2 px-6">
-        <dt className="pt-2 pb-2 text-sm font-medium text-gray-500">{leftName}</dt>
-        <dd className="pt-2 pb-2 text-sm text-gray-900 text-right font-code pr-4">{leftValue}</dd>
-        <dt className="pt-2 pb-2 text-sm font-medium text-gray-500 border-l pl-2">{rightName}</dt>
-        <dd className="pt-2 pb-2 text-sm text-gray-900 text-right font-code pr-4">{rightValue}</dd>
-      </div>
+    <div className="grid grid-cols-4 gap-2 px-6">
+      <dt className="pt-2 pb-2 text-sm font-medium text-gray-500">
+        {leftName}
+      </dt>
+      <dd className="pt-2 pb-2 text-sm text-gray-900 text-right font-code pr-4">
+        {leftValue}
+      </dd>
+      <dt className="pt-2 pb-2 text-sm font-medium text-gray-500 border-l pl-2">
+        {rightName}
+      </dt>
+      <dd className="pt-2 pb-2 text-sm text-gray-900 text-right font-code pr-4">
+        {rightValue}
+      </dd>
+    </div>
   );
 };
-  
+
 export default AeronStatCoreStatDisplayRow;
-  

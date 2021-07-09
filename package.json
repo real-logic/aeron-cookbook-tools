@@ -21,7 +21,8 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
     "prepare": "husky install",
-    "prettier-format": "prettier --config .prettierrc.json 'lib/**/*.ts' --write"
+    "prettier-format": "prettier --config .prettierrc.json 'lib/**/*.ts' --write",
+    "prettier-tsx": "prettier --config .prettierrc.json 'components/**/*.tsx' --write"
   },
   "dependencies": {
     "@headlessui/react": "^1.3.0",

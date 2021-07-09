@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import AeronStatClusterStatDisplay from '../components/AeronStatClusterStatDisplay';
 import {
   AeronStatParsed,
   SendSocket,
@@ -29,8 +28,7 @@ import {
   consensusModuleStateValues,
   clusterNodeRoleValues,
   clusterElectionStateValues,
-  AeronChannel,
-  AeronChannelSection
+  AeronChannel
 } from './aeronStatTypes';
 
 export function parseAeronStat(stats: string): AeronStatParsed {

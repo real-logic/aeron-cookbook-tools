@@ -14,61 +14,95 @@
  * limitations under the License.
  */
 
-import { AeronStatOutput } from "../lib/aeronStatTypes";
-import AeronStatFeaturePills from "./AeronStatFeaturePills";
-import AeronStatCoreStatDisplay from "./AeronStatCoreStatDisplay";
-import AeronStatCoreSocketDisplay from "./AeronStatCoreSocketDisplay";
-import AeronStatSubscriptionDisplay from "./AeronStatSubscriptionDisplay";
-import AeronStatPublicationDisplay from "./AeronStatPublicationDisplay";
-import AeronStatInternalFlowDisplay from "./AeronStatInternalFlowDisplay";
-import AeronStatClusterStatDisplay from "./AeronStatClusterStatDisplay";
-import AeronStatCoreStatRecommendations from "./AeronStatCoreStatRecommendations";
-
+import React from 'react';
+import { AeronStatOutput } from '../lib/aeronStatTypes';
+import AeronStatFeaturePills from './AeronStatFeaturePills';
+import AeronStatCoreStatDisplay from './AeronStatCoreStatDisplay';
+import AeronStatCoreSocketDisplay from './AeronStatCoreSocketDisplay';
+import AeronStatSubscriptionDisplay from './AeronStatSubscriptionDisplay';
+import AeronStatPublicationDisplay from './AeronStatPublicationDisplay';
+import AeronStatInternalFlowDisplay from './AeronStatInternalFlowDisplay';
+import AeronStatClusterStatDisplay from './AeronStatClusterStatDisplay';
+import AeronStatCoreStatRecommendations from './AeronStatCoreStatRecommendations';
 
 type Props = {
-    aeronStatOutput: AeronStatOutput;
-  };
-  
-  const AeronStatOutputDisplay: React.FC<Props> = ({ aeronStatOutput }: Props) => {
-    return (
-        <div className="mt-0 overflow-x-scroll overflow-scroll">
-            
-        <div className="bg-white shadow overflow-hidden">
-          <div className="px-4 py-5 sm:px-6">
-            <h3 className="text-lg leading-6 h-8 font-semibold text-gray-900 items-center">Aeron Stat Analysis
-                <AeronStatFeaturePills featuresDetected={aeronStatOutput.featuresDetected}/>
-            </h3>
-            <p className="mt-1 max-w-2xl text-sm text-gray-500">As processed at {Date().toLocaleString()}.</p>
-          </div>
-  
-          <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
-            <dl className="divide-y divide-gray-200">
-              <div className={aeronStatOutput.mediaDriverRunningFlag === true ? "py-4 grid grid-cols-3 gap-4 px-6" : "py-4 grid grid-cols-4 gap-4 px-6"}>
-                    <dd className={aeronStatOutput.mediaDriverRunningFlag === true ? "mt-1 text-sm text-green-600 col-span-3" : "mt-1 text-sm text-red-600 col-span-3"}>{aeronStatOutput.mediaDriverRunning}</dd>
-              </div>
-              {aeronStatOutput.recomendations.length > 0 && (
-                <AeronStatCoreStatRecommendations recs={aeronStatOutput.recomendations}/>
-              )}
-              <AeronStatCoreStatDisplay topLevelStats={aeronStatOutput.topLevelAeronStats}/>
-              {aeronStatOutput.clusterData !== undefined && (
-                <AeronStatClusterStatDisplay clusterData={aeronStatOutput.clusterData}/>
-              )}
-              {aeronStatOutput.internalFlows.length > 0 && (
-                <AeronStatInternalFlowDisplay flows={aeronStatOutput.internalFlows}/>
-              )}
-              {aeronStatOutput.aeronStatPublications.length > 0 && (
-                <AeronStatPublicationDisplay publications={aeronStatOutput.aeronStatPublications}/>
-              )}
-              {aeronStatOutput.aeronStatSubscriptions.length > 0 && (
-                <AeronStatSubscriptionDisplay subscriptions={aeronStatOutput.aeronStatSubscriptions}/>
-              )}
-              <AeronStatCoreSocketDisplay sendSockets={aeronStatOutput.sendSockets} receiveSockets={aeronStatOutput.receiveSockets}/>
-            </dl>
-          </div>
+  aeronStatOutput: AeronStatOutput;
+};
+
+const AeronStatOutputDisplay: React.FC<Props> = ({
+  aeronStatOutput
+}: Props) => {
+  return (
+    <div className="mt-0 overflow-x-scroll overflow-scroll">
+      <div className="bg-white shadow overflow-hidden">
+        <div className="px-4 py-5 sm:px-6">
+          <h3 className="text-lg leading-6 h-8 font-semibold text-gray-900 items-center">
+            Aeron Stat Analysis
+            <AeronStatFeaturePills
+              featuresDetected={aeronStatOutput.featuresDetected}
+            />
+          </h3>
+          <p className="mt-1 max-w-2xl text-sm text-gray-500">
+            As processed at {Date().toLocaleString()}.
+          </p>
+        </div>
+
+        <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
+          <dl className="divide-y divide-gray-200">
+            <div
+              className={
+                aeronStatOutput.mediaDriverRunningFlag === true
+                  ? 'py-4 grid grid-cols-3 gap-4 px-6'
+                  : 'py-4 grid grid-cols-4 gap-4 px-6'
+              }
+            >
+              <dd
+                className={
+                  aeronStatOutput.mediaDriverRunningFlag === true
+                    ? 'mt-1 text-sm text-green-600 col-span-3'
+                    : 'mt-1 text-sm text-red-600 col-span-3'
+                }
+              >
+                {aeronStatOutput.mediaDriverRunning}
+              </dd>
+            </div>
+            {aeronStatOutput.recomendations.length > 0 && (
+              <AeronStatCoreStatRecommendations
+                recs={aeronStatOutput.recomendations}
+              />
+            )}
+            <AeronStatCoreStatDisplay
+              topLevelStats={aeronStatOutput.topLevelAeronStats}
+            />
+            {aeronStatOutput.clusterData !== undefined && (
+              <AeronStatClusterStatDisplay
+                clusterData={aeronStatOutput.clusterData}
+              />
+            )}
+            {aeronStatOutput.internalFlows.length > 0 && (
+              <AeronStatInternalFlowDisplay
+                flows={aeronStatOutput.internalFlows}
+              />
+            )}
+            {aeronStatOutput.aeronStatPublications.length > 0 && (
+              <AeronStatPublicationDisplay
+                publications={aeronStatOutput.aeronStatPublications}
+              />
+            )}
+            {aeronStatOutput.aeronStatSubscriptions.length > 0 && (
+              <AeronStatSubscriptionDisplay
+                subscriptions={aeronStatOutput.aeronStatSubscriptions}
+              />
+            )}
+            <AeronStatCoreSocketDisplay
+              sendSockets={aeronStatOutput.sendSockets}
+              receiveSockets={aeronStatOutput.receiveSockets}
+            />
+          </dl>
         </div>
       </div>
-    );
-  };
-  
+    </div>
+  );
+};
+
 export default AeronStatOutputDisplay;
-  

@@ -82,12 +82,16 @@ export type TopLevelAeronStats = {
 };
 
 export enum AeronStatFeatureDetected {
+  // eslint-disable-next-line no-unused-vars
   AERON_UDP,
+  // eslint-disable-next-line no-unused-vars
   AERON_IPC,
+  // eslint-disable-next-line no-unused-vars
   AERON_ARCHIVE_SERVER,
+  // eslint-disable-next-line no-unused-vars
   AERON_CLUSTER,
-  ARTIO,
-  NONE
+  // eslint-disable-next-line no-unused-vars
+  ARTIO
 }
 
 export const clusterElectionStateValues = new Map<string, string>([

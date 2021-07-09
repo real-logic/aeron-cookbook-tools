@@ -14,31 +14,52 @@
  * limitations under the License.
  */
 
-import { AeronClusterDetails } from "../lib/aeronStatTypes";
-import AeronStatCoreStatDisplayRow from "./AeronStatCoreStatDisplayRow";
+import React from 'react';
+import { AeronClusterDetails } from '../lib/aeronStatTypes';
+import AeronStatCoreStatDisplayRow from './AeronStatCoreStatDisplayRow';
 
 type Props = {
   clusterData: AeronClusterDetails;
-  };
- 
-const AeronStatClusterStatDisplay: React.FC<Props> = ({ clusterData }: Props) => {
+};
+
+const AeronStatClusterStatDisplay: React.FC<Props> = ({
+  clusterData
+}: Props) => {
   return (
-    
     <>
-    {clusterData.likelyClusterStat === true && (
-      <>
-        <div className="py-2 px-6 bg-yellow-100">
-          <span>Aeron Cluster</span>
-        </div>
-        <AeronStatCoreStatDisplayRow leftName='Cluster Commit Pos' leftValue={clusterData.clusterCommitPos}  rightName='Timed out clients' rightValue={clusterData.timedOutClientCount}/>
-        <AeronStatCoreStatDisplayRow leftName='Cluster Node Role' leftValue={clusterData.nodeRole}  rightName='Cluster Errors' rightValue={clusterData.clusterErrors}/>
-        <AeronStatCoreStatDisplayRow leftName='Consensus Module State' leftValue={clusterData.consensusModuleState}  rightName='Cluster Container Errors' rightValue={clusterData.clusterContainerErrors}/>
-        <AeronStatCoreStatDisplayRow leftName='Election State' leftValue={clusterData.electionState}  rightName='Snapshot Count' rightValue={clusterData.snapshotCount}/>
-      </>
-    )}
+      {clusterData.likelyClusterStat === true && (
+        <>
+          <div className="py-2 px-6 bg-yellow-100">
+            <span>Aeron Cluster</span>
+          </div>
+          <AeronStatCoreStatDisplayRow
+            leftName="Cluster Commit Pos"
+            leftValue={clusterData.clusterCommitPos}
+            rightName="Timed out clients"
+            rightValue={clusterData.timedOutClientCount}
+          />
+          <AeronStatCoreStatDisplayRow
+            leftName="Cluster Node Role"
+            leftValue={clusterData.nodeRole}
+            rightName="Cluster Errors"
+            rightValue={clusterData.clusterErrors}
+          />
+          <AeronStatCoreStatDisplayRow
+            leftName="Consensus Module State"
+            leftValue={clusterData.consensusModuleState}
+            rightName="Cluster Container Errors"
+            rightValue={clusterData.clusterContainerErrors}
+          />
+          <AeronStatCoreStatDisplayRow
+            leftName="Election State"
+            leftValue={clusterData.electionState}
+            rightName="Snapshot Count"
+            rightValue={clusterData.snapshotCount}
+          />
+        </>
+      )}
     </>
   );
 };
-  
+
 export default AeronStatClusterStatDisplay;
-  

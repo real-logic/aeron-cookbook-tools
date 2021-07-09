@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 
@@ -25,7 +26,7 @@ type Props = {
 
 const meta = {
   description: `${SITE_NAME}.`,
-  ogImagePath: '/assets/card-image.webp',
+  ogImagePath: '/assets/card-image.webp'
 };
 
 const Meta: React.FC<Props> = ({ pageTitle }: Props) => {

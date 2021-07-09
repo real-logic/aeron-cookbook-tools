@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { AeronChannel } from "../lib/aeronStatTypes";
+import React from 'react';
+import { AeronChannel } from '../lib/aeronStatTypes';
 
 const componentColors = new Map<string, string>([
   ['endpoint', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-blue-200'],
@@ -27,20 +27,28 @@ const componentColors = new Map<string, string>([
   ['mtu', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-gray-200'],
   ['group', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-gray-600 text-white'],
   ['sparse', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-green-200'],
-  ['control-mode', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-green-800 text-white'],
+  [
+    'control-mode',
+    'has-tooltip rounded-r-sm pl-2 pr-2 bg-green-800 text-white'
+  ],
   ['term-id', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-purple-200'],
-  ['term-offset', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-purple-800 text-white'],
+  [
+    'term-offset',
+    'has-tooltip rounded-r-sm pl-2 pr-2 bg-purple-800 text-white'
+  ],
   ['tags', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-indigo-200'],
   ['session-id', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-indigo-800 text-white'],
   ['init-term-id', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-yellow-200'],
-  ['alias', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-yellow-800 text-white'],
+  ['alias', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-yellow-800 text-white']
 ]);
-
 
 const explains = new Map<string, string>([
   ['endpoint', 'the endpoint for this channel'],
   ['linger', 'the length of time the channel should linger for'],
-  ['term-length', 'the term length for this channel. max message length is min(16MB, term-length/8). log buffers are approximately 3x the term length.'],
+  [
+    'term-length',
+    'the term length for this channel. max message length is min(16MB, term-length/8). log buffers are approximately 3x the term length.'
+  ],
   ['control', 'the MDC control endpoint'],
   ['fc', 'the flow control arguments'],
   ['rejoin', 'signals if the channel should rejoin after loss'],
@@ -53,34 +61,51 @@ const explains = new Map<string, string>([
   ['tags', 'the tags for this channel'],
   ['session-id', 'the session id for this channel'],
   ['init-term-id', 'the initial term id for this channel'],
-  ['alias', 'the channel alias'],
+  ['alias', 'the channel alias']
 ]);
 
 type Props = {
   channelData: AeronChannel;
-  };
- 
+};
+
 const AeronStatChannelDisplay: React.FC<Props> = ({ channelData }: Props) => {
   return (
-    
     <>
-    {channelData.success === true && (
-      <>
-          <span className="font-code">aeron:{channelData.media}?<br/>
-          {channelData.sections.map((part) => (
-            <><span key={part.key} className={componentColors.get(part.key) === undefined ? '' : componentColors.get(part.key)}>{part.key}={part.value}<span className='tooltip'>{explains.get(part.key) === undefined ? '' : explains.get(part.key)}</span></span><span>|</span><br/></>
-          ))}
+      {channelData.success === true && (
+        <>
+          <span className="font-code">
+            aeron:{channelData.media}?<br />
+            {channelData.sections.map((part) => (
+              <>
+                <span
+                  key={part.key}
+                  className={
+                    componentColors.get(part.key) === undefined
+                      ? ''
+                      : componentColors.get(part.key)
+                  }
+                >
+                  {part.key}={part.value}
+                  <span className="tooltip">
+                    {explains.get(part.key) === undefined
+                      ? ''
+                      : explains.get(part.key)}
+                  </span>
+                </span>
+                <span>|</span>
+                <br />
+              </>
+            ))}
           </span>
-      </>
-    )}
-    {channelData.success !== true && (
-      <>
+        </>
+      )}
+      {channelData.success !== true && (
+        <>
           <span className="font-code">{channelData.channel}</span>
-      </>
-    )}
+        </>
+      )}
     </>
   );
 };
-  
+
 export default AeronStatChannelDisplay;
-  

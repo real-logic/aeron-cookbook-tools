@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-import { ReceiveSocket, SendSocket } from "../lib/aeronStatTypes";
+import React from 'react';
+import { ReceiveSocket, SendSocket } from '../lib/aeronStatTypes';
 
 type Props = {
-  receiveSockets: ReceiveSocket[],
+  receiveSockets: ReceiveSocket[];
   sendSockets: SendSocket[];
-  };
+};
 
- 
-const AeronStatCoreSocketDisplay: React.FC<Props> = ({ receiveSockets, sendSockets }: Props) => {
+const AeronStatCoreSocketDisplay: React.FC<Props> = ({
+  receiveSockets,
+  sendSockets
+}: Props) => {
   return (
     <>
-    <div className="py-2 px-6 bg-yellow-100">
-       <span>Sockets in use by Aeron</span>
+      <div className="py-2 px-6 bg-yellow-100">
+        <span>Sockets in use by Aeron</span>
       </div>
       <div className="grid grid-cols-2 px-6 bg-yellow-50">
         <dt className="text-sm font-medium text-gray-500">Send</dt>
@@ -34,18 +37,22 @@ const AeronStatCoreSocketDisplay: React.FC<Props> = ({ receiveSockets, sendSocke
       </div>
       <div className="grid grid-cols-2 font-code">
         <ul className="text-xs">
-        {sendSockets.map((socket) => (
-          <li key={socket.hostAndPort} className="pb-2 pl-6 pt-2 border-b">{socket.hostAndPort} - {socket.channel}</li>
-        ))}
+          {sendSockets.map((socket) => (
+            <li key={socket.hostAndPort} className="pb-2 pl-6 pt-2 border-b">
+              {socket.hostAndPort} - {socket.channel}
+            </li>
+          ))}
         </ul>
         <ul className="text-xs font-code">
-        {receiveSockets.map((socket) => (
-          <li key={socket.hostAndPort} className="pb-2 pl-2 pt-2 border-b">{socket.hostAndPort} - {socket.channel}</li>
-        ))}</ul>
+          {receiveSockets.map((socket) => (
+            <li key={socket.hostAndPort} className="pb-2 pl-2 pt-2 border-b">
+              {socket.hostAndPort} - {socket.channel}
+            </li>
+          ))}
+        </ul>
       </div>
     </>
   );
 };
-  
+
 export default AeronStatCoreSocketDisplay;
-  

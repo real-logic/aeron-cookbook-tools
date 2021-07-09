@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import Layout from '../components/Layout';
+import React from 'react';
+import App from '../components/App';
 
 const Index: React.FC = () => {
   return (
-    <Layout/>
+    <App/>
   );
 };
 
