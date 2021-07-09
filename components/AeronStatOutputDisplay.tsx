@@ -33,8 +33,8 @@ const AeronStatOutputDisplay: React.FC<Props> = ({
   aeronStatOutput
 }: Props) => {
   return (
-    <div className="mt-0 overflow-x-scroll overflow-scroll">
-      <div className="bg-white shadow overflow-hidden">
+    <div className="mt-0 overflow-scroll overscroll-y-none">
+      <div className="bg-white shadow">
         <div className="px-4 py-5 sm:px-6">
           <h3 className="text-lg leading-6 h-8 font-semibold text-gray-900 items-center">
             Aeron Stat Analysis

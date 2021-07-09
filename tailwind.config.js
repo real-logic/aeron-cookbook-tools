@@ -21,7 +21,7 @@ module.exports = {
     extend: {
       fontFamily: {
         'ui': ['-apple-system','BlinkMacSystemFont','Segoe UI','Roboto','Oxygen-Sans','Ubuntu','Cantarell','Helvetica Neue','sans-serif'],
-        'code': ['monaco', 'monospaced'],
+        'code': ['SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
       },
       fontSize: {
         '5xl': ['3rem', '3.5rem'],

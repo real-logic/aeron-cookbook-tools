@@ -67,7 +67,7 @@ const App = () => {
   }
 
   return (
-    <div className="h-screen overflow-hidden bg-gray-100 flex font-ui flex-col">
+    <div className="overflow-hidden overscroll-y-none bg-gray-100 flex font-ui flex-col">
       <Meta pageTitle={'Aeron Cookbook Tools'} />
       <header className="flex-shrink-0 relative h-16 bg-white flex items-center">
         <div className="absolute inset-y-0 left-0 md:static md:flex-shrink-0">
@@ -266,10 +266,10 @@ const App = () => {
           </div>
         </div>
       </header>
-      <div className="min-h-0 flex-1 flex overflow-hidden">
+      <div className="min-h-0 flex-1 flex overflow-hidden overscroll-y-none">
         <nav
           aria-label="Sidebar"
-          className="hidden md:block md:flex-shrink-0 md:bg-blue-200 md:overflow-y-auto"
+          className="hidden md:block md:flex-shrink-0 md:bg-blue-200 overscroll-y-none"
         >
           <div className="relative w-28 flex flex-col p-3 space-y-3">
             {sidebarNavigation.map((item) => (
@@ -427,26 +427,8 @@ const App = () => {
           )}
         </main>
       </div>
-      <footer className="bg-gray-900">
-        <div className="ml-4">
-          <div className="">
-            <span className=" text-white text-sm">
-              &copy; 2020-2021 <a href="/about">Shaun Laurens</a>.{' '}
-              <a
-                href="https://github.com/eleventy7/acb-tools"
-                className="text-blue-400"
-              >
-                Open source under the Apache 2.0 license.{' '}
-              </a>
-              <span className="text-red-400">
-                This is alpha software and may produce inaccurate output. Always
-                verify the output before blindly trusting it
-              </span>
-            </span>
-          </div>
-        </div>
-      </footer>
     </div>
+    
   );
 };
 
