@@ -1,5 +1,7 @@
 # Aeron Cookbook Tools
 
+[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/eleventy7/acb-tools)
+
 A collection of tools to help understand and operate [Aeron](https://github.com/real-logic/aeron). The first tool included helps interpret AeronStat output.
 
 The site is built with [Next.js 11](https://nextjs.org), and is linked to from [Aeron Cookbook](https://www.aeroncookbook.com).

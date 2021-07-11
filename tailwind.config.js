@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+
+const colors = require('tailwindcss/colors')
+
 module.exports = {
   purge: ['./components/**/*.tsx', './pages/**/*.tsx'],
   mode: 'jit',
@@ -26,6 +29,11 @@ module.exports = {
       fontSize: {
         '5xl': ['3rem', '3.5rem'],
       },
+      colors: {
+        cyan: colors.cyan,
+        teal: colors.teal,
+        orange: colors.orange,
+      }
       }
   }
 };
