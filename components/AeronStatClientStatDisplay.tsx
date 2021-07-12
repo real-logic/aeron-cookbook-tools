@@ -29,7 +29,7 @@ const AeronStatClientStatDisplay: React.FC<Props> = ({
       <div className="px-6 py-2 bg-yellow-100">
         <span>Aeron clients to this Media Driver</span>
       </div>
-     
+
       <div className="grid grid-cols-2 px-6 bg-yellow-50">
         <span className="pt-1 pr-2 text-xs font-bold text-gray-500 break-all ">
           Client ID

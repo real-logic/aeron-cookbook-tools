@@ -21,18 +21,33 @@ type Props = {
   value?: string;
 };
 
+const defaultProps = {
+  name: '',
+  value: '',
+};
+
 const AeronStatCoreStatDisplayRow: React.FC<Props> = ({
   name,
   value
 }: Props) => {
   return (
     <div className="grid grid-cols-2 gap-2 px-6 border">
-      <dt className="pt-2 pb-2 pl-2 text-sm text-gray-500 font-ui">{name}</dt>
-      <dd className="pt-2 pb-2 pr-4 text-sm text-right text-gray-900 font-code">
+      <dt className={value === '0'
+            ? 'pt-2 pb-2 pl-2 text-sm text-gray-400 font-ui'
+            : 'pt-2 pb-2 pl-2 text-sm text-gray-900 font-ui'}>{name}</dt>
+      <dd
+        className={
+          value === '0'
+            ? 'pt-2 pb-2 pr-4 text-sm text-right text-gray-400 font-code'
+            : 'pt-2 pb-2 pr-4 text-sm text-right text-gray-900 font-code'
+        }
+      >
         {value}
       </dd>
     </div>
   );
 };
+
+AeronStatCoreStatDisplayRow.defaultProps = defaultProps;
 
 export default AeronStatCoreStatDisplayRow;
