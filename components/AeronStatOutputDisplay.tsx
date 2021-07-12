@@ -24,6 +24,7 @@ import AeronStatPublicationDisplay from './AeronStatPublicationDisplay';
 import AeronStatInternalFlowDisplay from './AeronStatInternalFlowDisplay';
 import AeronStatClusterStatDisplay from './AeronStatClusterStatDisplay';
 import AeronStatCoreStatRecommendations from './AeronStatCoreStatRecommendations';
+import AeronStatClientStatDisplay from './AeronStatClientStatDisplay';
 
 type Props = {
   aeronStatOutput: AeronStatOutput;
@@ -36,18 +37,18 @@ const AeronStatOutputDisplay: React.FC<Props> = ({
     <div className="mt-0 overflow-scroll overscroll-y-none">
       <div className="bg-white shadow">
         <div className="px-4 py-5 sm:px-6">
-          <h3 className="text-lg leading-6 h-8 font-semibold text-gray-900 items-center">
+          <h3 className="items-center h-8 text-lg font-semibold leading-6 text-gray-900">
             Aeron Stat Analysis
             <AeronStatFeaturePills
               featuresDetected={aeronStatOutput.featuresDetected}
             />
           </h3>
-          <p className="mt-1 max-w-2xl text-sm text-gray-500">
+          <p className="max-w-2xl mt-1 text-sm text-gray-500">
             As processed at {Date().toLocaleString()}.
           </p>
         </div>
 
-        <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
+        <div className="px-4 py-5 border-t border-gray-200 sm:p-0">
           <dl className="divide-y divide-gray-200">
             <div
               className={
@@ -94,6 +95,9 @@ const AeronStatOutputDisplay: React.FC<Props> = ({
                 subscriptions={aeronStatOutput.aeronStatSubscriptions}
               />
             )}
+            <AeronStatClientStatDisplay
+              aeronClients={aeronStatOutput.aeronClients}
+            />
             <AeronStatCoreSocketDisplay
               sendSockets={aeronStatOutput.sendSockets}
               receiveSockets={aeronStatOutput.receiveSockets}

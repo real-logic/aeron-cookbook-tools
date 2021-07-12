@@ -67,7 +67,8 @@ export function recommend(aeronStatParsed: AeronStatParsed): AeronStatOutput {
       aeronStatParsed.internalFlows
     ),
     internalFlows: aeronStatParsed.internalFlows,
-    clusterData: aeronStatParsed.clusterData
+    clusterData: aeronStatParsed.clusterData,
+    aeronClients: aeronStatParsed.aeronClients
   };
 }
 

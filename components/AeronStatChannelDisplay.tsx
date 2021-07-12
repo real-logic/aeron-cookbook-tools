@@ -27,10 +27,7 @@ const componentColors = new Map<string, string>([
   ['mtu', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-gray-200'],
   ['group', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-gray-600 text-white'],
   ['sparse', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-green-200'],
-  [
-    'control-mode',
-    'has-tooltip rounded-r-sm pl-2 pr-2 bg-cyan-200 text-white'
-  ],
+  ['control-mode', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-cyan-200 text-white'],
   ['term-id', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-purple-200'],
   [
     'term-offset',

@@ -33,6 +33,7 @@ export type AeronStatOutput = {
   aeronStatSubscriptions: AeronStatSubscription[];
   internalFlows: AeronStatInternalFlow[];
   clusterData?: AeronClusterDetails;
+  aeronClients : AeronClient[];
 };
 
 export type AeronChannel = {
@@ -47,6 +48,11 @@ export type AeronChannelSection = {
   key: string;
   value: string;
 };
+
+export type AeronClient = {
+  client: string;
+  heartbeatTime : string;
+}
 
 export type TopLevelAeronStats = {
   bytesSent: number;
@@ -231,4 +237,5 @@ export type AeronStatParsed = {
   internalFlows: AeronStatInternalFlow[];
   error: string;
   clusterData?: AeronClusterDetails;
+  aeronClients : AeronClient[];
 };

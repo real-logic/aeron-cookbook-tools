@@ -16,7 +16,7 @@
 
 import React from 'react';
 import { TopLevelAeronStats } from '../lib/aeronStatTypes';
-import AeronStatCoreStatDisplayRow from './AeronStatCoreStatDisplayRow';
+import AeronStatCoreStatDisplayCell from './AeronStatCoreStatDisplayCell';
 
 type Props = {
   topLevelStats?: TopLevelAeronStats;
@@ -27,95 +27,131 @@ const AeronStatCoreStatDisplay: React.FC<Props> = ({
 }: Props) => {
   return (
     <>
-      <div className="py-2 px-6 bg-yellow-100">
+      <div className="px-6 py-2 bg-yellow-100">
         <span>Core Counters</span>
       </div>
-      <AeronStatCoreStatDisplayRow
-        leftName="Errors"
-        leftValue={topLevelStats?.errors.toLocaleString()}
-        rightName="Back Pressure Events"
-        rightValue={topLevelStats?.backPressureEvents.toLocaleString()}
-      />
-      <AeronStatCoreStatDisplayRow
-        leftName="Short Sends"
-        leftValue={topLevelStats?.shortSends.toLocaleString()}
-        rightName="Loss Gap Fills"
-        rightValue={topLevelStats?.lossGapFills.toLocaleString()}
-      />
-      <AeronStatCoreStatDisplayRow
-        leftName="NAKs Sent"
-        leftValue={topLevelStats?.naksSent.toLocaleString()}
-        rightName="Invalid Packets"
-        rightValue={topLevelStats?.invalidPackets.toLocaleString()}
-      />
-      <AeronStatCoreStatDisplayRow
-        leftName="NAKs Received"
-        leftValue={topLevelStats?.naksReceived.toLocaleString()}
-        rightName="Client Liveness Timeouts"
-        rightValue={topLevelStats?.clientLivenessTimeouts.toLocaleString()}
-      />
-      <AeronStatCoreStatDisplayRow
-        leftName="Retransmits Sent"
-        leftValue={topLevelStats?.retransmitsSent.toLocaleString()}
-        rightName="Aeron Clients using this Media Driver"
-        rightValue={topLevelStats?.connectedAeronClients.toLocaleString()}
-      />
-      <AeronStatCoreStatDisplayRow
-        leftName="Conductor max cycle time doing its work"
-        leftValue={
-          topLevelStats?.conductorMaxCycleTimeSeconds.toLocaleString() + 's'
-        }
-        rightName="Conductor work cycle exceeded threshold count"
-        rightValue={topLevelStats?.conductorWorkCycleExceededCount.toLocaleString()}
-      />
-      <AeronStatCoreStatDisplayRow
-        leftName="Bytes Sent"
-        leftValue={topLevelStats?.bytesSent.toLocaleString()}
-        rightName="Publications Unblocked"
-        rightValue={topLevelStats?.unblockedPublications.toLocaleString()}
-      />
-      <AeronStatCoreStatDisplayRow
-        leftName="Bytes Received"
-        leftValue={topLevelStats?.bytesReceived.toLocaleString()}
-        rightName="Commands Unblocked"
-        rightValue={topLevelStats?.unblockedControlCommands.toLocaleString()}
-      />
-      <AeronStatCoreStatDisplayRow
-        leftName="Heartbeats Sent"
-        leftValue={topLevelStats?.heartbeatsSent.toLocaleString()}
-        rightName="Status Messages Sent"
-        rightValue={topLevelStats?.statusMessagesSent.toLocaleString()}
-      />
-      <AeronStatCoreStatDisplayRow
-        leftName="Heartbeats Received"
-        leftValue={topLevelStats?.heartbeatsReceived.toLocaleString()}
-        rightName="Status Messages Received"
-        rightValue={topLevelStats?.statusMessagesReceived.toLocaleString()}
-      />
-      <AeronStatCoreStatDisplayRow
-        leftName="Failed attempts to free log buffers"
-        leftValue={topLevelStats?.failedAttemptsToFreeLogBuffers.toLocaleString()}
-        rightName="Failed offers to driver conductor proxy"
-        rightValue={topLevelStats?.failedOffersToDriverConductorProxy.toLocaleString()}
-      />
-      <AeronStatCoreStatDisplayRow
-        leftName="Failed offers to receiver proxy"
-        leftValue={topLevelStats?.failedOffersToReceiverProxy.toLocaleString()}
-        rightName="Failed offers to sender proxy"
-        rightValue={topLevelStats?.failedOffersToSenderProxy.toLocaleString()}
-      />
-      <AeronStatCoreStatDisplayRow
-        leftName="Flow Control Overruns"
-        leftValue={topLevelStats?.flowControlOverRuns.toLocaleString()}
-        rightName="Name resolution count"
-        rightValue={topLevelStats?.nameResolutionCount.toLocaleString()}
-      />
-      <AeronStatCoreStatDisplayRow
-        leftName="Flow Control Underruns"
-        leftValue={topLevelStats?.flowControlUnderRuns.toLocaleString()}
-        rightName="Current resolved address"
-        rightValue={topLevelStats?.currentResolvedHost}
-      />
+      <div className="grid grid-cols-2">
+        {/* Left col */}
+        <div className="grid grid-cols-1">
+          <AeronStatCoreStatDisplayCell
+            name="Short Sends"
+            value={topLevelStats?.shortSends.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="NAKs Sent"
+            value={topLevelStats?.naksSent.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="NAKs Received"
+            value={topLevelStats?.naksReceived.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Retransmits Sent"
+            value={topLevelStats?.retransmitsSent.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Conductor max cycle time doing its work"
+            value={
+              topLevelStats?.conductorMaxCycleTimeSeconds.toLocaleString() + 's'
+            }
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Conductor work cycle exceeded threshold count"
+            value={topLevelStats?.conductorWorkCycleExceededCount.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Bytes Sent"
+            value={topLevelStats?.bytesSent.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Bytes Received"
+            value={topLevelStats?.bytesReceived.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Heartbeats Sent"
+            value={topLevelStats?.heartbeatsSent.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Heartbeats Received"
+            value={topLevelStats?.heartbeatsReceived.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Flow Control Underruns"
+            value={topLevelStats?.flowControlUnderRuns.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Flow Control Overruns"
+            value={topLevelStats?.flowControlOverRuns.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Name resolution count"
+            value={topLevelStats?.nameResolutionCount.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Current resolved address"
+            value={topLevelStats?.currentResolvedHost}
+          />
+        </div>
+        {/* Right col */}
+        <div className="grid grid-cols-1">
+          <AeronStatCoreStatDisplayCell
+            name="Errors"
+            value={topLevelStats?.errors.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Back Pressure Events"
+            value={topLevelStats?.backPressureEvents.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Loss Gap Fills"
+            value={topLevelStats?.lossGapFills.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Invalid Packets"
+            value={topLevelStats?.invalidPackets.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Client Liveness Timeouts"
+            value={topLevelStats?.clientLivenessTimeouts.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Aeron Clients using this Media Driver"
+            value={topLevelStats?.connectedAeronClients.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Publications Unblocked"
+            value={topLevelStats?.unblockedPublications.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Commands Unblocked"
+            value={topLevelStats?.unblockedControlCommands.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Status Messages Sent"
+            value={topLevelStats?.statusMessagesSent.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Status Messages Received"
+            value={topLevelStats?.statusMessagesReceived.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Failed attempts to free log buffers"
+            value={topLevelStats?.failedAttemptsToFreeLogBuffers.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Failed offers to receiver proxy"
+            value={topLevelStats?.failedOffersToReceiverProxy.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Failed offers to driver conductor proxy"
+            value={topLevelStats?.failedOffersToDriverConductorProxy.toLocaleString()}
+          />
+          <AeronStatCoreStatDisplayCell
+            name="Failed offers to sender proxy"
+            value={topLevelStats?.failedOffersToSenderProxy.toLocaleString()}
+          />
+        </div>
+      </div>
     </>
   );
 };

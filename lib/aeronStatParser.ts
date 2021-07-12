@@ -28,6 +28,7 @@ import {
   consensusModuleStateValues,
   clusterNodeRoleValues,
   clusterElectionStateValues,
+  AeronClient,
   AeronChannel
 } from './aeronStatTypes';
 
@@ -49,7 +50,8 @@ export function parseAeronStat(stats: string): AeronStatParsed {
       sendSockets: [],
       receiveSockets: [],
       internalFlows: [],
-      clusterData: undefined
+      clusterData: undefined, 
+      aeronClients: []
     };
   }
 
@@ -82,6 +84,8 @@ export function parseAeronStat(stats: string): AeronStatParsed {
   //feature detection
   const aeronStatFeaturesDetected = parseAeronStatFeaturesDetected(lines);
 
+  const clients = parseClients(lines);
+
   //archive
   const clusterData = parseClusterData(lines);
   //cluster
@@ -99,7 +103,8 @@ export function parseAeronStat(stats: string): AeronStatParsed {
     sendSockets: sendSockets,
     receiveSockets: receiveSockets,
     internalFlows: internalFlows,
-    clusterData: clusterData
+    clusterData: clusterData,
+    aeronClients: clients
   };
 }
 
@@ -697,3 +702,22 @@ function parseInternalFlows(
 
   return internalFlows;
 }
+function parseClients(lines: string[]) : AeronClient[]{
+  const clients: AeronClient[] = [];
+  for (let i = 2; i < lines.length - 1; i++) {
+    const rightSide = lines[i].split(' - ')[1].trim();
+    const leftSide = lines[i].split(' - ')[0].trim();
+     //sub-pos: 21 -792819123 108 aeron:udp?term-length=64k|endpoint=10.24.175.22:10006 @0
+    if (rightSide.startsWith('client-heartbeat')) {
+      const heartBeatEpochMsStr = stripComma(leftSide.split(':')[1].trim());
+      const dateObj = new Date(parseInt(heartBeatEpochMsStr));
+      const client = rightSide.split(': ')[1].trim();
+      clients.push({
+        client: client,
+        heartbeatTime: dateObj.toISOString(),
+      });
+    }
+  }
+  return clients;
+}
+
