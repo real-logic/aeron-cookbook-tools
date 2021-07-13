@@ -127,7 +127,7 @@ function checkStats(
       message:
         'Back pressure was raised ' +
         topLevelAeronStats.backPressureEvents.toLocaleString() +
-        ' time(s). Check subscriptions for send back pressure.',
+        ' time(s). Check publications for send back pressure.',
       weight: 800
     });
   }
