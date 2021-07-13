@@ -29,15 +29,7 @@ export function recommend(aeronStatParsed: AeronStatParsed): AeronStatOutput {
   let mediaDriverRunning = '';
   let mediaDriverRunningFlag = false;
 
-  if (aeronStatParsed.heartbeatAgeMs > 0) {
-    mediaDriverRunning =
-      'Media driver is running with PID ' +
-      aeronStatParsed.pid +
-      '. Media Driver heartbeat age is ' +
-      aeronStatParsed.heartbeatAgeMs +
-      'ms';
-    mediaDriverRunningFlag = true;
-  } else if (aeronStatParsed.heartbeatAgeMs > 60000) {
+  if (aeronStatParsed.heartbeatAgeMs > 60000) {
     mediaDriverRunning =
       'Media driver might be running with PID ' +
       aeronStatParsed.pid +
@@ -45,6 +37,14 @@ export function recommend(aeronStatParsed: AeronStatParsed): AeronStatOutput {
       aeronStatParsed.heartbeatAgeMs +
       'ms. With such a high heartbeat age, it could have exited without a clean shutdown.';
     mediaDriverRunningFlag = false;
+  } else if (aeronStatParsed.heartbeatAgeMs > 0) {
+    mediaDriverRunning =
+      'Media driver is running with PID ' +
+      aeronStatParsed.pid +
+      '. Media Driver heartbeat age is ' +
+      aeronStatParsed.heartbeatAgeMs +
+      'ms';
+    mediaDriverRunningFlag = true;
   } else {
     mediaDriverRunning =
       'Media driver is not running. Last PID was ' + aeronStatParsed.pid;
@@ -229,22 +229,22 @@ function checkStats(
     });
   }
 
+  if (topLevelAeronStats.retransmitsSent > 0 && topLevelAeronStats.naksReceived > 0 &&
+    topLevelAeronStats.flowControlUnderRuns > 0) {
+      recs.push({
+        level: 'WARN',
+        message:
+          'It appears as if data loss at the network layer was likely. Review LossStat output.',
+        weight: 1010
+      });
+  }
+
   if (clusterData !== undefined) {
     if (clusterData.likelyClusterStat !== true) {
       return recs;
     }
   } else {
     return recs;
-  }
-
-  if (topLevelAeronStats.retransmitsSent > 0 && topLevelAeronStats.naksReceived > 0 &&
-      topLevelAeronStats.flowControlUnderRuns > 0) {
-        recs.push({
-          level: 'WARN',
-          message:
-            'It appears as if data loss at the network layer was likely. Review LossStat output.',
-          weight: 1010
-        });
   }
 
   if (parseInt(clusterData.clusterErrors) > 0) {
