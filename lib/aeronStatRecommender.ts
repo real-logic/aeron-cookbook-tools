@@ -121,6 +121,17 @@ function checkStats(
     });
   }
 
+  if (topLevelAeronStats.backPressureEvents > 0) {
+    recs.push({
+      level: 'WARN',
+      message:
+        'Back pressure was raised ' +
+        topLevelAeronStats.backPressureEvents.toLocaleString() +
+        ' time(s). Check subscriptions for send back pressure.',
+      weight: 800
+    });
+  }
+
   for (let i = 0; i < internalFlows.length; i++) {
     const logDiff = parseInt(stripComma(internalFlows[i].diff));
     if (Math.abs(logDiff) > 1000) {
