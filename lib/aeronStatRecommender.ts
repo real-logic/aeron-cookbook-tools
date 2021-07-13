@@ -202,7 +202,7 @@ function checkStats(
       level: 'WARN',
       message:
         'The Media Driver had to retransmit data ' +
-        topLevelAeronStats.retransmitsSent +
+        topLevelAeronStats.retransmitsSent.toLocaleString() +
         ' ' +
         times +
         '.',
