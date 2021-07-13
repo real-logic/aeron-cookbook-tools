@@ -166,7 +166,7 @@ function checkStats(
       message:
         'The Media Driver had to send ' +
         topLevelAeronStats.naksSent.toLocaleString() +
-        ' NAKs in order to request missing packet(s).',
+        ' NAKs in order to request missing packet(s). Review loss-stat output.',
       weight: 500
     });
   }
@@ -177,7 +177,7 @@ function checkStats(
       message:
         'The Media Driver received ' +
         topLevelAeronStats.naksReceived.toLocaleString() +
-        ' NAKs in order to recover missing packet(s).',
+        ' NAKs in order to recover missing packet(s). Review loss-stat output for this and the other process.',
       weight: 500
     });
   }
@@ -205,7 +205,7 @@ function checkStats(
         topLevelAeronStats.retransmitsSent.toLocaleString() +
         ' ' +
         times +
-        '.',
+        '. Review loss-stat output.',
       weight: 500
     });
   }
@@ -216,6 +216,16 @@ function checkStats(
     }
   } else {
     return recs;
+  }
+
+  if (topLevelAeronStats.retransmitsSent > 0 && topLevelAeronStats.flowControlUnderRuns > 0 &&
+      (topLevelAeronStats.naksReceived > 0 || topLevelAeronStats.naksSent > 0)) {
+        recs.push({
+          level: 'WARN',
+          message:
+            'It appears as if data loss at the network layer was likely. Review LossStat output.',
+          weight: 1010
+        });
   }
 
   if (parseInt(clusterData.clusterErrors) > 0) {
