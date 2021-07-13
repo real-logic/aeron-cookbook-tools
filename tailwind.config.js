@@ -33,6 +33,10 @@ module.exports = {
         cyan: colors.cyan,
         teal: colors.teal,
         orange: colors.orange,
+        lime: colors.lime,
+        amber : colors.amber,
+        emerald : colors.emerald,
+        fuchsia : colors.fuchsia
       }
       }
   }

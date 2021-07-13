@@ -20,23 +20,23 @@ const componentColors = new Map<string, string>([
   ['endpoint', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-blue-200'],
   ['linger', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-teal-200 text-white'],
   ['term-length', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-pink-200'],
-  ['control', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-orange-200 text-white'],
+  ['control', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-orange-200 text-black'],
   ['fc', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-red-100'],
-  ['ssc', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-blue-500 text-white'],
+  ['ssc', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-emerald-200 text-black'],
   ['rejoin', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-red-600 text-white'],
   ['mtu', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-gray-200'],
   ['group', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-gray-600 text-white'],
   ['sparse', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-green-200'],
-  ['control-mode', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-cyan-200 text-white'],
+  ['control-mode', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-cyan-200 text-black'],
   ['term-id', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-purple-200'],
   [
     'term-offset',
-    'has-tooltip rounded-r-sm pl-2 pr-2 bg-purple-800 text-white'
+    'has-tooltip rounded-r-sm pl-2 pr-2 bg-lime-200 text-black'
   ],
   ['tags', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-indigo-200'],
-  ['session-id', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-indigo-800 text-white'],
+  ['session-id', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-amber-200 text-black'],
   ['init-term-id', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-yellow-200'],
-  ['alias', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-yellow-800 text-white']
+  ['alias', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-fuchsia-200 text-black']
 ]);
 
 const explains = new Map<string, string>([
