@@ -18,7 +18,7 @@ import { AeronChannel } from '../lib/aeronStatTypes';
 
 const componentColors = new Map<string, string>([
   ['endpoint', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-blue-200'],
-  ['linger', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-teal-200 text-white'],
+  ['linger', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-teal-200 text-black'],
   ['term-length', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-pink-200'],
   ['control', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-orange-200 text-black'],
   ['fc', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-red-100'],
