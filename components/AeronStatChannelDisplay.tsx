@@ -40,7 +40,7 @@ const componentColors = new Map<string, string>([
 ]);
 
 const explains = new Map<string, string>([
-  ['endpoint', 'the endpoint for this channel'],
+  ['endpoint', 'the endpoint (typically host + port) for this channel'],
   ['linger', 'the length of time the channel should linger for'],
   [
     'term-length',
