@@ -76,6 +76,7 @@ export function recommend(aeronStatParsed: AeronStatParsed): AeronStatOutput {
     ),
     internalFlows: aeronStatParsed.internalFlows,
     clusterData: aeronStatParsed.clusterData,
+    archiveData: aeronStatParsed.archiveData,
     aeronClients: aeronStatParsed.aeronClients
   };
 }
@@ -229,14 +230,17 @@ function checkStats(
     });
   }
 
-  if (topLevelAeronStats.retransmitsSent > 0 && topLevelAeronStats.naksReceived > 0 &&
-    topLevelAeronStats.flowControlUnderRuns > 0) {
-      recs.push({
-        level: 'WARN',
-        message:
-          'It appears as if data loss at the network layer was likely. Review LossStat output.',
-        weight: 1010
-      });
+  if (
+    topLevelAeronStats.retransmitsSent > 0 &&
+    topLevelAeronStats.naksReceived > 0 &&
+    topLevelAeronStats.flowControlUnderRuns > 0
+  ) {
+    recs.push({
+      level: 'WARN',
+      message:
+        'It appears as if data loss at the network layer was likely. Review LossStat output.',
+      weight: 1010
+    });
   }
 
   if (clusterData !== undefined) {

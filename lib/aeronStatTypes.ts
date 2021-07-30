@@ -33,7 +33,8 @@ export type AeronStatOutput = {
   aeronStatSubscriptions: AeronStatSubscription[];
   internalFlows: AeronStatInternalFlow[];
   clusterData?: AeronClusterDetails;
-  aeronClients : AeronClient[];
+  archiveData: AeronArchiveDetails;
+  aeronClients: AeronClient[];
 };
 
 export type AeronChannel = {
@@ -51,8 +52,8 @@ export type AeronChannelSection = {
 
 export type AeronClient = {
   client: string;
-  heartbeatTime : string;
-}
+  heartbeatTime: string;
+};
 
 export type TopLevelAeronStats = {
   bytesSent: number;
@@ -167,6 +168,11 @@ export type AeronClusterDetails = {
   clusterCommitPos: string;
 };
 
+export type AeronArchiveDetails = {
+  likelyArchiveStat: boolean;
+  archiveControlSessions: string;
+};
+
 export type AeronStatPublication = {
   channel: string;
   channelParsed: AeronChannel;
@@ -194,6 +200,7 @@ export type AeronStatSubscription = {
   receivePositionNumeric: number;
   receiveHighWatermark: string;
   recordingPosition: string;
+  joinPosition: string;
 };
 
 export type AeronStatInternalFlow = {
@@ -237,5 +244,6 @@ export type AeronStatParsed = {
   internalFlows: AeronStatInternalFlow[];
   error: string;
   clusterData?: AeronClusterDetails;
-  aeronClients : AeronClient[];
+  archiveData: AeronArchiveDetails;
+  aeronClients: AeronClient[];
 };

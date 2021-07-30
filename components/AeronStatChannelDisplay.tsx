@@ -29,10 +29,7 @@ const componentColors = new Map<string, string>([
   ['sparse', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-green-200'],
   ['control-mode', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-cyan-200 text-black'],
   ['term-id', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-purple-200'],
-  [
-    'term-offset',
-    'has-tooltip rounded-r-sm pl-2 pr-2 bg-lime-200 text-black'
-  ],
+  ['term-offset', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-lime-200 text-black'],
   ['tags', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-indigo-200'],
   ['session-id', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-amber-200 text-black'],
   ['init-term-id', 'has-tooltip rounded-r-sm pl-2 pr-2 bg-yellow-200'],
@@ -83,7 +80,7 @@ const AeronStatChannelDisplay: React.FC<Props> = ({ channelData }: Props) => {
                   }
                 >
                   {part.key}={part.value}
-                  <span className="tooltip">
+                  <span className="tooltip" key={part.key}>
                     {explains.get(part.key) === undefined
                       ? ''
                       : explains.get(part.key)}

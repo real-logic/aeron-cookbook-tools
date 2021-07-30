@@ -23,7 +23,7 @@ type Props = {
 
 const defaultProps = {
   name: '',
-  value: '',
+  value: ''
 };
 
 const AeronStatCoreStatDisplayRow: React.FC<Props> = ({
@@ -32,9 +32,15 @@ const AeronStatCoreStatDisplayRow: React.FC<Props> = ({
 }: Props) => {
   return (
     <div className="grid grid-cols-2 gap-2 px-6 border">
-      <dt className={value === '0'
+      <dt
+        className={
+          value === '0'
             ? 'pt-2 pb-2 pl-2 text-sm text-gray-400 font-ui'
-            : 'pt-2 pb-2 pl-2 text-sm text-gray-900 font-ui'}>{name}</dt>
+            : 'pt-2 pb-2 pl-2 text-sm text-gray-900 font-ui'
+        }
+      >
+        {name}
+      </dt>
       <dd
         className={
           value === '0'

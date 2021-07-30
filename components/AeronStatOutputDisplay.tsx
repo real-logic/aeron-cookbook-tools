@@ -23,6 +23,7 @@ import AeronStatSubscriptionDisplay from './AeronStatSubscriptionDisplay';
 import AeronStatPublicationDisplay from './AeronStatPublicationDisplay';
 import AeronStatInternalFlowDisplay from './AeronStatInternalFlowDisplay';
 import AeronStatClusterStatDisplay from './AeronStatClusterStatDisplay';
+import AeronStatArchiveStatDisplay from './AeronStatArchiveStatDisplay';
 import AeronStatCoreStatRecommendations from './AeronStatCoreStatRecommendations';
 import AeronStatClientStatDisplay from './AeronStatClientStatDisplay';
 
@@ -75,6 +76,11 @@ const AeronStatOutputDisplay: React.FC<Props> = ({
             <AeronStatCoreStatDisplay
               topLevelStats={aeronStatOutput.topLevelAeronStats}
             />
+            {aeronStatOutput.archiveData.likelyArchiveStat === true && (
+              <AeronStatArchiveStatDisplay
+                archiveData={aeronStatOutput.archiveData}
+              />
+            )}
             {aeronStatOutput.clusterData !== undefined && (
               <AeronStatClusterStatDisplay
                 clusterData={aeronStatOutput.clusterData}

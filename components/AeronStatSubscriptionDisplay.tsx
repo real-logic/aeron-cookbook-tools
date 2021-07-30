@@ -27,50 +27,59 @@ const AeronStatSubscriptionDisplay: React.FC<Props> = ({
 }: Props) => {
   return (
     <>
-      <div className="py-2 px-6 bg-yellow-100">
+      <div className="px-6 py-2 bg-yellow-100">
         <span>External Subscriptions - {subscriptions.length}</span>
       </div>
 
-      <div className="grid grid-cols-7 px-6 bg-yellow-50">
-        <span className="pt-1 pr-2 text-xs text-gray-500 font-bold col-span-2 break-all">
+      <div className="grid grid-cols-8 px-6 bg-yellow-50">
+        <span className="col-span-2 pt-1 pr-2 text-xs font-bold text-gray-500 break-all">
           Channel
         </span>
-        <span className="pt-1 pr-2 text-xs text-gray-500 bg-blue-50 font-bold text-right">
+        <span className="pt-1 pr-2 text-xs font-bold text-right text-gray-500 bg-blue-50">
           Session
         </span>
-        <span className="pt-1 pr-2 text-xs text-gray-500 font-bold text-right">
+        <span className="pt-1 pr-2 text-xs font-bold text-right text-gray-500">
           Stream ID
         </span>
-        <span className="pt-1 pr-2 text-xs text-gray-500 bg-blue-50 font-bold text-right ">
+        <span className="pt-1 pr-2 text-xs font-bold text-right text-gray-500 bg-blue-50 ">
           Subs Pos
         </span>
-        <span className="pt-1 pr-2 text-xs text-gray-500 font-bold text-right">
+        <span className="pt-1 pr-2 text-xs font-bold text-right text-gray-500">
           Receive Pos
         </span>
-        <span className="pt-1 pr-2 text-xs text-gray-500 bg-blue-50 font-bold text-right ">
+        <span className="pt-1 pr-2 text-xs font-bold text-right text-gray-500 bg-blue-50 ">
           Receive Hwm
+        </span>
+        <span className="pt-1 pr-2 text-xs font-bold text-right text-gray-500 ">
+          Join Pos
         </span>
       </div>
 
       {subscriptions.map((subs) => (
-        <div key={subs.sessionId} className="grid grid-cols-7 px-6">
-          <span className="pt-2 pb-2 pr-2 text-xs text-gray-900 col-span-2 break-all font-code">
-            <AeronStatChannelDisplay channelData={subs.channelParsed} />
+        <div key={subs.sessionId} className="grid grid-cols-8 px-6">
+          <span className="col-span-2 pt-2 pb-2 pr-2 text-xs text-gray-900 break-all font-code">
+            <AeronStatChannelDisplay
+              channelData={subs.channelParsed}
+              key={subs.channel}
+            />
           </span>
-          <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 font-code bg-blue-50 text-right">
+          <span className="pt-2 pb-2 pl-2 pr-2 text-xs text-right text-gray-900 font-code bg-blue-50">
             {subs.sessionId}
           </span>
-          <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 font-code text-right">
+          <span className="pt-2 pb-2 pl-2 pr-2 text-xs text-right text-gray-900 font-code">
             {subs.streamId}
           </span>
-          <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 font-code bg-blue-50 text-right">
+          <span className="pt-2 pb-2 pl-2 pr-2 text-xs text-right text-gray-900 font-code bg-blue-50">
             {subs.subPosition}
           </span>
-          <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 font-code text-right ">
+          <span className="pt-2 pb-2 pl-2 pr-2 text-xs text-right text-gray-900 font-code ">
             {subs.receivePosition}
           </span>
-          <span className="pt-2 pb-2 pr-2 pl-2 text-xs text-gray-900 font-code bg-blue-50 text-right ">
+          <span className="pt-2 pb-2 pl-2 pr-2 text-xs text-right text-gray-900 font-code bg-blue-50 ">
             {subs.receiveHighWatermark}
+          </span>
+          <span className="pt-2 pb-2 pl-2 pr-2 text-xs text-right text-gray-900 font-code ">
+            {subs.joinPosition}
           </span>
         </div>
       ))}

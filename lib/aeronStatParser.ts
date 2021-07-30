@@ -25,6 +25,7 @@ import {
   AeronStatFeatureDetected,
   AeronStatInternalFlow,
   AeronClusterDetails,
+  AeronArchiveDetails,
   consensusModuleStateValues,
   clusterNodeRoleValues,
   clusterElectionStateValues,
@@ -50,7 +51,11 @@ export function parseAeronStat(stats: string): AeronStatParsed {
       sendSockets: [],
       receiveSockets: [],
       internalFlows: [],
-      clusterData: undefined, 
+      clusterData: undefined,
+      archiveData: {
+        likelyArchiveStat: false,
+        archiveControlSessions: ''
+      },
       aeronClients: []
     };
   }
@@ -87,9 +92,10 @@ export function parseAeronStat(stats: string): AeronStatParsed {
   const clients = parseClients(lines);
 
   //archive
-  const clusterData = parseClusterData(lines);
+  const archiveData = parseArchiveData(lines);
+
   //cluster
-  //artio
+  const clusterData = parseClusterData(lines);
 
   return {
     error: 'WIP',
@@ -104,6 +110,7 @@ export function parseAeronStat(stats: string): AeronStatParsed {
     receiveSockets: receiveSockets,
     internalFlows: internalFlows,
     clusterData: clusterData,
+    archiveData: archiveData,
     aeronClients: clients
   };
 }
@@ -145,6 +152,7 @@ function parseSubscription(
   let recordingPosition = '';
   let receivePositionNumeric = -1;
   let processingLine = '';
+  let joinPosition = '';
 
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].indexOf('sub-pos') > -1) {
@@ -165,6 +173,9 @@ function parseSubscription(
     if (rightSide.startsWith('sub-pos')) {
       subPosition = parseInt(numericLeftSide).toLocaleString();
       subPositionNumeric = parseInt(numericLeftSide);
+      if (rightSide.indexOf('@') > -1) {
+        joinPosition = rightSide.split('@')[1].trim();
+      }
     } else if (rightSide.startsWith('rcv-pos')) {
       receivePosition = parseInt(numericLeftSide).toLocaleString();
       receivePositionNumeric = parseInt(numericLeftSide);
@@ -194,7 +205,8 @@ function parseSubscription(
     receiveHighWatermark: receiveHighWatermark,
     recordingPosition: recordingPosition,
     receivePositionNumeric: receivePositionNumeric,
-    mystery: ''
+    mystery: '',
+    joinPosition: joinPosition
   };
 }
 
@@ -281,6 +293,26 @@ function parseClusterData(lines: string[]): AeronClusterDetails {
   };
 }
 
+function parseArchiveData(lines: string[]): AeronArchiveDetails {
+  let likelyArchiveStat = false;
+  let archiveControlSessions = '';
+
+  for (let i = 2; i < lines.length - 1; i++) {
+    if (lines[i].indexOf('Archive Control Sessions') > -1) {
+      const leftSide = lines[i].split(' - ')[0].trim();
+      const numericLeftSide = stripComma(leftSide.split(':')[1].trim());
+      console.log(numericLeftSide);
+      likelyArchiveStat = true;
+      archiveControlSessions = parseInt(numericLeftSide).toLocaleString();
+    }
+  }
+
+  return {
+    archiveControlSessions: archiveControlSessions,
+    likelyArchiveStat: likelyArchiveStat
+  };
+}
+
 function parsePublication(
   lines: string[],
   sessionId: string
@@ -358,7 +390,6 @@ function parseAeronChannel(channel: string): AeronChannel {
 
   const spy = channel.indexOf('aeron-spy') > -1;
   const firstCut = channel.split('aeron:');
-  console.log(firstCut);
   if (firstCut.length < 2 || spy) {
     return {
       success: false,
@@ -702,22 +733,21 @@ function parseInternalFlows(
 
   return internalFlows;
 }
-function parseClients(lines: string[]) : AeronClient[]{
+function parseClients(lines: string[]): AeronClient[] {
   const clients: AeronClient[] = [];
   for (let i = 2; i < lines.length - 1; i++) {
     const rightSide = lines[i].split(' - ')[1].trim();
     const leftSide = lines[i].split(' - ')[0].trim();
-     //sub-pos: 21 -792819123 108 aeron:udp?term-length=64k|endpoint=10.24.175.22:10006 @0
+    //sub-pos: 21 -792819123 108 aeron:udp?term-length=64k|endpoint=10.24.175.22:10006 @0
     if (rightSide.startsWith('client-heartbeat')) {
       const heartBeatEpochMsStr = stripComma(leftSide.split(':')[1].trim());
       const dateObj = new Date(parseInt(heartBeatEpochMsStr));
       const client = rightSide.split(': ')[1].trim();
       clients.push({
         client: client,
-        heartbeatTime: dateObj.toISOString(),
+        heartbeatTime: dateObj.toISOString()
       });
     }
   }
   return clients;
 }
-

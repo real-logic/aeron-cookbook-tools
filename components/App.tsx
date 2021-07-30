@@ -428,24 +428,24 @@ const App = () => {
         </main>
       </div>
       <footer className="bg-gray-900">
-         <div className="ml-4">
-           <div className="">
-             <span className="text-sm text-white ">
-               &copy; 2020-2021 <a href="/about">Shaun Laurens</a>.{' '}
-               <a
-                 href="https://github.com/eleventy7/acb-tools"
-                 className="text-blue-400"
-               >
-                 Open source under the Apache 2.0 license.{' '}
-               </a>
-               <span className="text-red-400">
-                 This is alpha software and may produce inaccurate output. Always
-                 verify the output before blindly trusting it
-               </span>
-             </span>
-           </div>
-         </div>
-       </footer>
+        <div className="ml-4">
+          <div className="">
+            <span className="text-sm text-white ">
+              &copy; 2020-2021 <a href="/about">Shaun Laurens</a>.{' '}
+              <a
+                href="https://github.com/eleventy7/acb-tools"
+                className="text-blue-400"
+              >
+                Open source under the Apache 2.0 license.{' '}
+              </a>
+              <span className="text-red-400">
+                This is alpha software and may produce inaccurate output. Always
+                verify the output before blindly trusting it
+              </span>
+            </span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
