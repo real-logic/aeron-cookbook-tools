@@ -56,7 +56,7 @@
     "prettier": "^2.4.1",
     "rehype": "^12.0.0",
     "simple-functional-loader": "^1.2.1",
-    "ts-node": "^10.2.1",
+    "ts-node": "^10.3.0",
     "typescript": "^4.4.3"
   }
 }
