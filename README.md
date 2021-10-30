@@ -4,7 +4,7 @@
 
 A collection of tools to help understand and operate [Aeron](https://github.com/real-logic/aeron). The first tool included helps interpret AeronStat output.
 
-The site is built with [Next.js 11](https://nextjs.org), and is linked to from [Aeron Cookbook](https://www.aeroncookbook.com).
+The site is built with [Next.js 12](https://nextjs.org), and is linked to from [Aeron Cookbook](https://www.aeroncookbook.com).
 
 ## Running the site locally
 
@@ -16,9 +16,11 @@ The site is built with [Next.js 11](https://nextjs.org), and is linked to from [
 ## Building the site for deployment
 
 To run a build for hosting you can first build with `yarn build` and then run `yarn export`.
+
 ## License
 
 Open sourced under the Apache 2.0 license. See LICENSE.TXT.
+
 ## Copyright
 
 ©2020-2021 Shaun Laurens.

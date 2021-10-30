@@ -15,6 +15,7 @@
  */
 
 module.exports = {
+  swcMinify: true,
   async headers() {
     return [
       {
@@ -23,11 +24,11 @@ module.exports = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'private, max-age=604800, must-revalidate',
+            value: 'private, max-age=604800, must-revalidate'
           }
-        ],
-      },
-    ]
+        ]
+      }
+    ];
   },
   async rewrites() {
     return [
@@ -40,5 +41,5 @@ module.exports = {
         destination: 'https://plausible.io/api/event'
       }
     ];
-  },
-}
+  }
+};
