@@ -14,30 +14,47 @@
  * limitations under the License.
  */
 
-
-const colors = require('tailwindcss/colors')
+const colors = require('tailwindcss/colors');
 
 module.exports = {
-  purge: ['./components/**/*.tsx', './pages/**/*.tsx'],
+  content: ['./components/**/*.tsx', './pages/**/*.tsx'],
   mode: 'jit',
   theme: {
     extend: {
       fontFamily: {
-        'ui': ['-apple-system','BlinkMacSystemFont','Segoe UI','Roboto','Oxygen-Sans','Ubuntu','Cantarell','Helvetica Neue','sans-serif'],
-        'code': ['SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
+        ui: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'Oxygen-Sans',
+          'Ubuntu',
+          'Cantarell',
+          'Helvetica Neue',
+          'sans-serif'
+        ],
+        code: [
+          'SFMono-Regular',
+          'Menlo',
+          'Monaco',
+          'Consolas',
+          'Liberation Mono',
+          'Courier New',
+          'monospace'
+        ]
       },
       fontSize: {
-        '5xl': ['3rem', '3.5rem'],
+        '5xl': ['3rem', '3.5rem']
       },
       colors: {
         cyan: colors.cyan,
         teal: colors.teal,
         orange: colors.orange,
         lime: colors.lime,
-        amber : colors.amber,
-        emerald : colors.emerald,
-        fuchsia : colors.fuchsia
+        amber: colors.amber,
+        emerald: colors.emerald,
+        fuchsia: colors.fuchsia
       }
-      }
+    }
   }
 };
