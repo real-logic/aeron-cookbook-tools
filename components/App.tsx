@@ -431,7 +431,7 @@ const App = () => {
         <div className="ml-4">
           <div className="">
             <span className="text-sm text-white ">
-              &copy; 2020-2021 <a href="/about">Shaun Laurens</a>.{' '}
+              &copy; 2020-2022 <a href="/about">Shaun Laurens</a>.{' '}
               <a
                 href="https://github.com/eleventy7/acb-tools"
                 className="text-blue-400"
