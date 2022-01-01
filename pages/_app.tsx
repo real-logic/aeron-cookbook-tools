@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Shaun Laurens
+ * Copyright 2020-2022 Shaun Laurens
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import 'tailwindcss/tailwind.css';
 const MyApp: React.FC<AppProps> = ({ Component, pageProps }: AppProps) => {
   return (
     <ThemeProvider attribute="class">
-        <Component {...pageProps} />
+      <Component {...pageProps} />
     </ThemeProvider>
   );
 };

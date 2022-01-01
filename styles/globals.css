@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Shaun Laurens
+ * Copyright 2020-2022 Shaun Laurens
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,19 @@
 @tailwind components;
 @tailwind utilities;
 
-.tooltip{
-    visibility: hidden;
-    position: absolute;
+.tooltip {
+  visibility: hidden;
+  position: absolute;
 }
 
 .has-tooltip:hover .tooltip {
-    visibility: visible;
-    z-index: 100;
-    margin-left: 15px;
-    padding: 5px;
-    background-color: #fec7c7;
-    border-radius: 0px;
-    border-radius: 4px;
-    -webkit-box-shadow: 5px 5px 15px -5px #000000; 
-    box-shadow: 5px 5px 15px -5px #000000;
+  visibility: visible;
+  z-index: 100;
+  margin-left: 15px;
+  padding: 5px;
+  background-color: #fec7c7;
+  border-radius: 0px;
+  border-radius: 4px;
+  -webkit-box-shadow: 5px 5px 15px -5px #000000;
+  box-shadow: 5px 5px 15px -5px #000000;
 }
