@@ -27,7 +27,7 @@
     "@headlessui/react": "^1.5.0",
     "@heroicons/react": "^1.0.5",
     "@popperjs/core": "^2.11.2",
-    "autoprefixer": "^10.4.2",
+    "autoprefixer": "^10.4.8",
     "classnames": "^2.3.1",
     "next": "^12.1.0",
     "next-remote-watch": "^1.0.0",
