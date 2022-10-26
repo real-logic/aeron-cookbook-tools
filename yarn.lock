@@ -157,12 +157,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@next/bundle-analyzer@npm:^12.1.0":
-  version: 12.1.0
-  resolution: "@next/bundle-analyzer@npm:12.1.0"
+"@next/bundle-analyzer@npm:^13.0.0":
+  version: 13.0.0
+  resolution: "@next/bundle-analyzer@npm:13.0.0"
   dependencies:
     webpack-bundle-analyzer: 4.3.0
-  checksum: 7085b903f9b6ffba3d9a4932de88bf9a4ee4ee48e4c6883edfbff32981b30992f65477511e632842ae98714cd12d40502467192b52bf6dd0af8b9ee9e6cf0d39
+  checksum: 610ff17c156b02d88fdf66277144f1a40e975bf7c87a16aa819af400c178acbd870bdfce99cff754f9c89b44f600c95e5ef7b67e2f694f16e12f53f3d31d7729
   languageName: node
   linkType: hard
 
@@ -725,7 +725,7 @@ __metadata:
   dependencies:
     "@headlessui/react": ^1.5.0
     "@heroicons/react": ^1.0.5
-    "@next/bundle-analyzer": ^12.1.0
+    "@next/bundle-analyzer": ^13.0.0
     "@popperjs/core": ^2.11.2
     "@types/node": ^16.11.25
     "@types/prettier": ^2.4.4
