@@ -130,12 +130,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@heroicons/react@npm:^1.0.5":
-  version: 1.0.5
-  resolution: "@heroicons/react@npm:1.0.5"
+"@heroicons/react@npm:^2.0.16":
+  version: 2.0.16
+  resolution: "@heroicons/react@npm:2.0.16"
   peerDependencies:
     react: ">= 16"
-  checksum: 12114af19c17f69140cc7338e4cd12fe38098ad3ed79f02762106160655cde3ebdba58a2b26f1067f720786187364fd9465bc72f02aad85b0ead8172d76aa51d
+  checksum: 1e51bfec722bfd68f27fd4f37a024141938eb4b0058c3eab073a6d1aa08cf4f6deb1e8533ca85473cb16be1d1b528e2d57b8617f8b967e66292bf243daec5dd0
   languageName: node
   linkType: hard
 
@@ -724,7 +724,7 @@ __metadata:
   resolution: "aeron-tools@workspace:."
   dependencies:
     "@headlessui/react": ^1.5.0
-    "@heroicons/react": ^1.0.5
+    "@heroicons/react": ^2.0.16
     "@next/bundle-analyzer": ^12.1.0
     "@popperjs/core": ^2.11.2
     "@types/node": ^16.11.25
