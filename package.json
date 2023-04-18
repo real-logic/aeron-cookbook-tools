@@ -52,7 +52,7 @@
     "eslint-config-prettier": "^8.7.0",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "husky": "^7.0.4",
+    "husky": "^8.0.3",
     "prettier": "^2.8.4",
     "rehype": "^12.0.1",
     "simple-functional-loader": "^1.2.1",
