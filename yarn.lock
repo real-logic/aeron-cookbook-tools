@@ -390,10 +390,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^16.18.14":
-  version: 16.18.14
-  resolution: "@types/node@npm:16.18.14"
-  checksum: 7865c1c3e7c7d2fef6103c6dfa181755dc48365024253d6acc460e884508b5937a222aa8bd04835988ff0bdc47867e2ada78859c0a7f9c65b44884316f3b469c
+"@types/node@npm:^18.15.12":
+  version: 18.15.12
+  resolution: "@types/node@npm:18.15.12"
+  checksum: dff7596db8d0a18bcd8da542dc62ed4377cba39546ff53baaa06d106f1482bc3e4e5e03644f5d1e3cef0904ffbe8ebbc244b2b0851f8025ab2a3959ee0ace58f
   languageName: node
   linkType: hard
 
@@ -673,7 +673,7 @@ __metadata:
     "@heroicons/react": ^1.0.6
     "@next/bundle-analyzer": ^12.3.4
     "@popperjs/core": ^2.11.6
-    "@types/node": ^16.18.14
+    "@types/node": ^18.15.12
     "@types/prettier": ^2.7.2
     "@types/react": ^17.0.53
     "@types/react-dom": ^17.0.19
