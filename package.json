@@ -40,7 +40,7 @@
     "tailwindcss": "^3.2.7"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^12.3.4",
+    "@next/bundle-analyzer": "^13.4.2",
     "@types/node": "^16.18.14",
     "@types/prettier": "^2.7.2",
     "@types/react": "^17.0.53",
