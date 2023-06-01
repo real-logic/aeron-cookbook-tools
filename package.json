@@ -24,7 +24,7 @@
     "prettier-tsx": "prettier --config .prettierrc.json 'components/**/*.tsx' --write"
   },
   "dependencies": {
-    "@headlessui/react": "^1.7.13",
+    "@headlessui/react": "^1.7.15",
     "@heroicons/react": "^1.0.6",
     "@popperjs/core": "^2.11.6",
     "autoprefixer": "^10.4.14",
