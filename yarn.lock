@@ -700,7 +700,7 @@ __metadata:
     simple-functional-loader: ^1.2.1
     tailwindcss: ^3.2.7
     ts-node: ^10.9.1
-    typescript: ^4.9.5
+    typescript: ^5.1.5
   languageName: unknown
   linkType: soft
 
@@ -5263,23 +5263,23 @@ resolve@^2.0.0-next.4:
   languageName: node
   linkType: hard
 
-typescript@^4.9.5:
-  version: 4.9.5
-  resolution: "typescript@npm:4.9.5"
+typescript@^5.1.5:
+  version: 5.1.5
+  resolution: "typescript@npm:5.1.5"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: ee000bc26848147ad423b581bd250075662a354d84f0e06eb76d3b892328d8d4440b7487b5a83e851b12b255f55d71835b008a66cbf8f255a11e4400159237db
+  checksum: 0eef8699e05ae767096924dbed633c340b4d36e953bb8ed87fb12e9dd9dcea5055ceac7182c614a556dbd346a8a82df799d330e1e286ae66e17c84e1710f6a6f
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.9.5#~builtin<compat/typescript>":
-  version: 4.9.5
-  resolution: "typescript@patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=d8b4e7"
+"typescript@patch:typescript@^5.1.5#~builtin<compat/typescript>":
+  version: 5.1.5
+  resolution: "typescript@patch:typescript@npm%3A5.1.5#~builtin<compat/typescript>::version=5.1.5&hash=d8b4e7"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: dc93a8cb88f42a4b5f074798a38ddf3ba5a8e083663cad6170f4fbfbdb69fe8dfb782584cb47c1e1814f38218699d76bcb39ae83b91333f116058b685c566a4d
+  checksum: d0a39feb7d9d16ea13c18fd6573622221ffb8beecc897ec0ba8c10ed18439962da3e8abe1acbed3a0d93502797f314d0d8540d49774d8add5866ec00bad955e8
   languageName: node
   linkType: hard
 
