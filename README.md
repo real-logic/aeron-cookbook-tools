@@ -23,4 +23,4 @@ Open sourced under the Apache 2.0 license. See LICENSE.TXT.
 
 ## Copyright
 
-©2020-2023 Shaun Laurens.
+©2020-2023 Adaptive Financial Consulting 
